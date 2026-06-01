@@ -349,9 +349,13 @@ button.ghost {
 .confetti.type-5 { background: #AA96DA; }
 
 @keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(720deg);
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  100% {
     opacity: 0;
+    transform: translateY(100vh) translateX(var(--sway, 0)) rotate(720deg);
   }
 }
 
@@ -362,7 +366,7 @@ button.ghost {
 }
 
 .confetti {
-  animation: fall 2.5s ease-in forwards;
+  /* Animation duration will be set inline per particle */
 }
 
 .celebration-emoji {
@@ -679,20 +683,30 @@ window.WORD_BANK = {
     
     createConfetti() {
       const container = document.querySelector('#celebrationContainer');
-      const confettiCount = 30;
+      const confettiCount = 70;
       
       for (let i = 0; i < confettiCount; i++) {
         const confetti = document.createElement('div');
         confetti.className = `confetti type-${i % 6}`;
-        confetti.style.left = Math.random() * 100 + '%';
+        
+        // Random positioning and rotation
+        const randomLeft = Math.random() * 100;
+        const randomDelay = Math.random() * 0.4;
+        const randomDuration = 1.8 + Math.random() * 2.2; // 1.8s to 4s
+        const randomSway = (Math.random() - 0.5) * 100; // Horizontal drift
+        const randomRotation = Math.random() * 360;
+        
+        confetti.style.left = randomLeft + '%';
         confetti.style.top = '-10px';
-        confetti.style.delay = (Math.random() * 0.3) + 'ms';
-        confetti.style.duration = (2.5 + Math.random() * 0.5) + 's';
-        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        confetti.style.setProperty('--sway', randomSway + 'px');
+        confetti.style.animation = `fall ${randomDuration}s ease-in forwards`;
+        confetti.style.animationDelay = randomDelay + 'ms';
+        confetti.style.transform = `rotate(${randomRotation}deg)`;
         
         container.appendChild(confetti);
         
-        setTimeout(() => confetti.remove(), 3000);
+        // Remove after animation completes
+        setTimeout(() => confetti.remove(), (randomDuration + randomDelay / 1000) * 1000 + 100);
       }
     },
     

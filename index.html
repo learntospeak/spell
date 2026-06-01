@@ -696,22 +696,101 @@ window.WORD_BANK = {
     return { masked, missing };
   }
 
+  let preferredVoice = null;
+  let speakTimer = null;
+
+  function chooseBestVoice() {
+    if (!("speechSynthesis" in window)) return null;
+
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const scoreVoice = (voice) => {
+      const name = (voice.name || "").toLocaleLowerCase();
+      const lang = (voice.lang || "").toLocaleLowerCase();
+      let score = 0;
+
+      // iPad/iPhone Safari often exposes Apple voices such as Karen, Samantha, Daniel,
+      // Moira, Tessa, and sometimes Enhanced/Premium variants if installed.
+      if (lang === "en-au") score += 80;
+      else if (lang.startsWith("en-au")) score += 70;
+      else if (lang === "en-gb") score += 55;
+      else if (lang === "en-us") score += 50;
+      else if (lang.startsWith("en")) score += 35;
+
+      if (name.includes("karen")) score += 45;       // Clear Australian Apple voice
+      if (name.includes("samantha")) score += 42;    // Clear Apple US voice
+      if (name.includes("daniel")) score += 35;      // Clear Apple UK voice
+      if (name.includes("moira")) score += 30;
+      if (name.includes("tessa")) score += 25;
+
+      if (name.includes("enhanced")) score += 35;
+      if (name.includes("premium")) score += 35;
+      if (name.includes("neural")) score += 25;
+      if (name.includes("siri")) score += 20;
+
+      // Avoid lower-quality compact voices when a better option exists.
+      if (name.includes("compact")) score -= 45;
+      if (name.includes("novelty")) score -= 100;
+
+      return score;
+    };
+
+    return voices
+      .filter((voice) => (voice.lang || "").toLocaleLowerCase().startsWith("en"))
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a))[0] || voices[0] || null;
+  }
+
+  function refreshPreferredVoice() {
+    preferredVoice = chooseBestVoice();
+  }
+
+  if ("speechSynthesis" in window) {
+    refreshPreferredVoice();
+    window.speechSynthesis.onvoiceschanged = refreshPreferredVoice;
+  }
+
   function speak(text) {
     if (!("speechSynthesis" in window)) {
       setFeedback("warn", "This browser does not support speech. Use fill-the-missing-letters mode instead.");
       return;
     }
+
+    // iPad Safari can occasionally queue or replay speech if cancel() and speak()
+    // happen too close together. This debounce keeps each button press to one utterance.
+    if (speakTimer) {
+      clearTimeout(speakTimer);
+      speakTimer = null;
+    }
+
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-AU";
-    utterance.rate = Number(els.speedSelect.value || 0.9);
-    utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
+
+    speakTimer = window.setTimeout(() => {
+      refreshPreferredVoice();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        utterance.lang = preferredVoice.lang || "en-AU";
+      } else {
+        utterance.lang = "en-AU";
+      }
+
+      utterance.rate = Number(els.speedSelect.value || 0.85);
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      window.speechSynthesis.speak(utterance);
+      speakTimer = null;
+    }, 90);
   }
 
   function speakCurrent() {
     if (!state.current) return;
-    speak(`Spell ${state.current.word}. ${state.current.word}.`);
+
+    // Say the word once only. The old version said:
+    // "Spell word. word." which sounded like double-speak on iPad.
+    speak(`Spell ${state.current.word}.`);
   }
 
   function renderWordList() {

@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spelling Bee Trainer</title>
+  <style>
+:root {
+  color-scheme: light;
+  --bg: #f7f3ea;
+  --panel: #ffffff;
+  --ink: #18212b;
+  --muted: #647084;
+  --line: #d9d2c3;
+  --accent: #176f87;
+  --accent-dark: #0f5264;
+  --good: #0d7a4f;
+  --bad: #b13d2b;
+  --warn: #8b6508;
+  --shadow: 0 18px 60px rgba(32, 42, 55, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255, 221, 102, 0.35), transparent 34rem),
+    radial-gradient(circle at bottom right, rgba(23, 111, 135, 0.22), transparent 32rem),
+    var(--bg);
+  color: var(--ink);
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(980px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: 28px 0 42px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.subhead {
+  margin: 0 auto;
+  color: var(--muted);
+  max-width: 620px;
+  font-size: 1.08rem;
+}
+
+.controls,
+.quick-links,
+.stats,
+.card,
+.word-list-panel {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.controls label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+select,
+input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--ink);
+}
+
+select:focus,
+input:focus,
+button:focus-visible {
+  outline: 3px solid rgba(23, 111, 135, 0.28);
+  outline-offset: 2px;
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  margin: 14px 0;
+  box-shadow: none;
+}
+
+.card {
+  padding: clamp(18px, 4vw, 32px);
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  background: #e2f2f6;
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.badge.muted {
+  background: #f3eee4;
+  color: var(--muted);
+}
+
+.prompt {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: clamp(1.7rem, 5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.masked-word {
+  margin: 10px auto 14px;
+  padding: 18px 16px;
+  border-radius: 18px;
+  background: #f6f8fb;
+  border: 1px dashed #aeb8c4;
+  text-align: center;
+  font-size: clamp(2rem, 7vw, 4rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  word-break: break-word;
+}
+
+.hint {
+  min-height: 24px;
+  text-align: center;
+  color: var(--muted);
+  margin: 8px 0 18px;
+}
+
+.answer-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.answer-form input {
+  font-size: 1.2rem;
+}
+
+button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  background: #eef2f5;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+button.primary {
+  color: #fff;
+  background: var(--accent);
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+button.ghost {
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.feedback {
+  min-height: 42px;
+  margin-top: 18px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.feedback.good {
+  color: var(--good);
+}
+
+.feedback.bad {
+  color: var(--bad);
+}
+
+.feedback.warn {
+  color: var(--warn);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.stats div {
+  background: rgba(255, 255, 255, 0.78);
+  padding: 16px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.stats strong {
+  font-size: 2rem;
+}
+
+.stats span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.word-list-panel {
+  margin-top: 14px;
+  padding: 16px 18px;
+  box-shadow: none;
+}
+
+.word-list-panel summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.word-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.word-chip {
+  border-radius: 999px;
+  background: #f4f1eb;
+  padding: 6px 10px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.celebration-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #4CAF50;
+  pointer-events: none;
+}
+
+.confetti.type-0 { background: #FF6B6B; }
+.confetti.type-1 { background: #4ECDC4; }
+.confetti.type-2 { background: #FFE66D; }
+.confetti.type-3 { background: #95E1D3; }
+.confetti.type-4 { background: #F38181; }
+.confetti.type-5 { background: #AA96DA; }
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.confetti {
+  animation: fall 2.5s ease-in forwards;
+}
+
+.celebration-emoji {
+  position: absolute;
+  font-size: 3rem;
+  pointer-events: none;
+  animation: bounce-and-fade 1.5s ease-out forwards;
+}
+
+@keyframes bounce-and-fade {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-60px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) scale(0.8);
+  }
+}
+
+.stat-bounce {
+  animation: stat-pulse 0.4s ease-out;
+}
+
+@keyframes stat-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  .controls,
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .answer-form {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row,
+  .quick-links {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 440px) {
+  .controls,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div id="celebrationContainer" class="celebration-container"></div>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Stage 2 + Stage 3</p>
+      <h1>Spelling Bee Trainer</h1>
+      <p class="subhead">Two quick practice games: listen and spell, or fill the missing section.</p>
+    </header>
+
+    <section class="controls" aria-label="Practice settings">
+      <label>
+        Child / stage
+        <select id="stageSelect">
+          <option value="2">Stage 2</option>
+          <option value="3">Stage 3</option>
+        </select>
+      </label>
+
+      <label>
+        Level
+        <select id="levelSelect">
+          <option value="all">All levels</option>
+          <option value="1">Level 1</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+          <option value="4">Level 4</option>
+          <option value="5">Level 5</option>
+        </select>
+      </label>
+
+      <label>
+        Game
+        <select id="modeSelect">
+          <option value="spell">Hear it, spell it</option>
+          <option value="missing">Fill the missing letters</option>
+          <option value="mix">Mix both games</option>
+        </select>
+      </label>
+
+      <label>
+        Voice speed
+        <select id="speedSelect">
+          <option value="0.75">Slow</option>
+          <option value="0.9" selected>Normal</option>
+          <option value="1.05">Fast</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="quick-links" aria-label="Quick stage links">
+      <button type="button" class="ghost" data-jump-stage="2">Stage 2 quick start</button>
+      <button type="button" class="ghost" data-jump-stage="3">Stage 3 quick start</button>
+      <button type="button" class="ghost" id="missedBtn" disabled>Review missed words</button>
+      <button type="button" class="ghost" id="soundToggle" title="Toggle sound effects (currently off)">🔇 Sound</button>
+    </section>
+
+    <section class="card" aria-live="polite">
+      <div class="meta-row">
+        <span id="stageBadge" class="badge">Stage 2</span>
+        <span id="levelBadge" class="badge muted">All levels</span>
+        <span id="modeBadge" class="badge muted">Hear it, spell it</span>
+      </div>
+
+      <div id="prompt" class="prompt">Press “New word” to begin.</div>
+      <div id="maskedWord" class="masked-word" hidden></div>
+      <p id="hint" class="hint">Tip: in fill-the-missing-letters mode, type just the missing section or the whole word.</p>
+
+      <form id="answerForm" class="answer-form" autocomplete="off">
+        <label class="sr-only" for="answerInput">Your answer</label>
+        <input id="answerInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the spelling here" />
+        <button type="submit" class="primary">Check</button>
+      </form>
+
+      <div class="button-row">
+        <button type="button" id="newWordBtn">New word</button>
+        <button type="button" id="speakBtn">Say it again</button>
+        <button type="button" id="hintBtn">Hint</button>
+        <button type="button" id="revealBtn">Reveal</button>
+      </div>
+
+      <div id="feedback" class="feedback" role="status"></div>
+    </section>
+
+    <section class="stats" aria-label="Practice stats">
+      <div>
+        <strong id="correctCount">0</strong>
+        <span>correct</span>
+      </div>
+      <div>
+        <strong id="tryCount">0</strong>
+        <span>checks</span>
+      </div>
+      <div>
+        <strong id="streakCount">0</strong>
+        <span>streak</span>
+      </div>
+      <div>
+        <strong id="poolCount">0</strong>
+        <span>words in set</span>
+      </div>
+    </section>
+
+    <details class="word-list-panel">
+      <summary>Show the current word list</summary>
+      <div id="wordList" class="word-list"></div>
+    </details>
+  </main>
+
+  <script>
+// Word bank transcribed from the Stage 2 and Stage 3 spelling bee sheets.
+// Edit this file if you spot a typo on the printed sheets.
+window.WORD_BANK = {
+  "2": {
+    label: "Stage 2",
+    levels: {
+      "1": [
+        "bang", "chin", "snow", "black", "mint", "song", "race", "team",
+        "party", "storm", "rash", "left", "sky", "shoe", "start", "sheep",
+        "tail", "paint", "spoon", "fair", "wild", "space", "meat", "party",
+        "goat", "stage", "story", "fork", "total", "stamp", "lime", "letter", "barn"
+      ],
+      "2": [
+        "sumo", "puck", "inlet", "Peru", "talent", "strum", "orbit", "yelp",
+        "young", "vase", "marble", "basket", "cabin", "broad", "antler", "dawn",
+        "tower", "France", "thunder", "salad", "worm", "title", "tact", "spine",
+        "holy", "skill", "mince", "vine", "zest", "royal", "trust", "Norway", "stage"
+      ],
+      "3": [
+        "coupon", "balance", "strange", "survey", "tantrum", "quiver", "voice", "rissole",
+        "thirsty", "onion", "sugar", "Saturn", "oblong", "statue", "author", "Brazil",
+        "myth", "wrist", "picture", "canyon", "require", "quickly", "practical", "mammal",
+        "landscape", "cotton", "thought", "fourteen", "awful", "afford", "history", "argue", "creative"
+      ],
+      "4": [
+        "beautiful", "apology", "certificate", "antelope", "maximum", "mischief", "luggage", "naughty",
+        "texture", "margarine", "caution", "negotiate", "polyester", "appetite", "divisible", "medley",
+        "tranquil", "drought", "Europe", "forfeit", "rhombus", "platoon", "ache", "influenza",
+        "mosquito", "pursuit", "receive", "patience", "reindeer"
+      ],
+      "5": [
+        "centaur", "ecstasy", "besiege", "amateur", "Paraguay", "critique", "deodorant", "plateau",
+        "precipice", "antonym", "brioche", "righteous", "tertiary", "tenacious", "camellia", "superstitious",
+        "meringue", "Zimbabwe", "euphemism", "pandemonium", "peripheral", "abseiling", "seismology"
+      ]
+    }
+  },
+  "3": {
+    label: "Stage 3",
+    levels: {
+      "1": [
+        "bowl", "corn", "lake", "many", "owl", "rain", "river", "Rome",
+        "storm", "vote", "round", "shoe", "sale", "surf", "taxi", "vote",
+        "skim", "sleep", "inside", "green", "goat", "farmer", "church", "click",
+        "Japan", "brain", "ace", "army", "France", "jelly", "smile"
+      ],
+      "2": [
+        "forty", "guess", "video", "further", "script", "idol", "giant", "ambush",
+        "cyclone", "breakfast", "energy", "engine", "bushwalking", "holiday", "suffix", "fencing",
+        "goggles", "fraction", "iceberg", "mushroom", "rodeo", "health", "lounge", "grammar",
+        "Britain", "stencil", "salami", "captain", "theme", "mirror", "instead"
+      ],
+      "3": [
+        "president", "metallic", "clearance", "Uluru", "cautious", "paramedic", "carnivore", "umbrella",
+        "royalty", "tentacle", "violence", "phantom", "protein", "archery", "calculator", "typhoon",
+        "Pakistan", "wallaroo", "nourish", "cautious", "substantial", "urgency", "recognition", "amusement",
+        "athletics", "lifeguard", "restaurant", "terrify", "balcony", "abdomen", "pedestal"
+      ],
+      "4": [
+        "counterfeit", "deliberately", "conspiracy", "delinquent", "controversial", "distraught", "jeopardy",
+        "inflammation", "intuition", "marvellous", "vulnerable", "parenthesis", "moustache", "magnesium",
+        "literature", "Antarctica", "chemistry", "concussion", "equestrian", "toboggan"
+      ],
+      "5": [
+        "buoyant", "cologne", "iridescent", "pharmaceutical", "paradigm", "liaison", "picturesque", "crustacean",
+        "Guatemala", "continuum", "gymkhana", "spinnaker", "saboteur", "hieroglyphics", "ratatouille", "subpoena",
+        "connoisseur", "courgette", "rheumatism", "effervescent"
+      ]
+    }
+  }
+};
+
+</script>
+  <script>
+(() => {
+  "use strict";
+
+  // Sound effects using Web Audio API
+  const sounds = {
+    soundEnabled: false, // Muted by default for iPad
+    
+    playSuccess() {
+      if (!this.soundEnabled) return;
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        
+        // Create a pleasant "ding" sound
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+        
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } catch (e) {
+        console.warn("Could not play success sound", e);
+      }
+    },
+    
+    playError() {
+      if (!this.soundEnabled) return;
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioContext.currentTime;
+        
+        // Create an annoying "buzzer" sound
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        // Alternating frequency for annoying effect
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(400, now + 0.1);
+        osc.frequency.setValueAtTime(300, now + 0.2);
+        
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } catch (e) {
+        console.warn("Could not play error sound", e);
+      }
+    }
+  };
+
+  // Celebration effects
+  const celebration = {
+    celebrationEmojis: ['🎉', '⭐', '🎊', '✨', '🏆', '👏'],
+    
+    createConfetti() {
+      const container = document.querySelector('#celebrationContainer');
+      const confettiCount = 30;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = `confetti type-${i % 6}`;
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.delay = (Math.random() * 0.3) + 'ms';
+        confetti.style.duration = (2.5 + Math.random() * 0.5) + 's';
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        
+        container.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    },
+    
+    createEmojis() {
+      const container = document.querySelector('#celebrationContainer');
+      const emojiCount = 3;
+      
+      for (let i = 0; i < emojiCount; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'celebration-emoji';
+        emoji.textContent = this.celebrationEmojis[Math.floor(Math.random() * this.celebrationEmojis.length)];
+        emoji.style.left = (30 + Math.random() * 40) + '%';
+        emoji.style.top = '50%';
+        emoji.style.animationDelay = (i * 0.15) + 's';
+        
+        container.appendChild(emoji);
+        
+        setTimeout(() => emoji.remove(), 1500);
+      }
+    },
+    
+    celebrate() {
+      this.createConfetti();
+      this.createEmojis();
+      sounds.playSuccess();
+    },
+    
+    notifyError() {
+      sounds.playError();
+    }
+  };
+
+  const els = {
+    stageSelect: document.querySelector("#stageSelect"),
+    levelSelect: document.querySelector("#levelSelect"),
+    modeSelect: document.querySelector("#modeSelect"),
+    speedSelect: document.querySelector("#speedSelect"),
+    stageBadge: document.querySelector("#stageBadge"),
+    levelBadge: document.querySelector("#levelBadge"),
+    modeBadge: document.querySelector("#modeBadge"),
+    prompt: document.querySelector("#prompt"),
+    maskedWord: document.querySelector("#maskedWord"),
+    hint: document.querySelector("#hint"),
+    form: document.querySelector("#answerForm"),
+    input: document.querySelector("#answerInput"),
+    feedback: document.querySelector("#feedback"),
+    newWordBtn: document.querySelector("#newWordBtn"),
+    speakBtn: document.querySelector("#speakBtn"),
+    hintBtn: document.querySelector("#hintBtn"),
+    revealBtn: document.querySelector("#revealBtn"),
+    missedBtn: document.querySelector("#missedBtn"),
+    soundToggle: document.querySelector("#soundToggle"),
+    correctCount: document.querySelector("#correctCount"),
+    tryCount: document.querySelector("#tryCount"),
+    streakCount: document.querySelector("#streakCount"),
+    poolCount: document.querySelector("#poolCount"),
+    wordList: document.querySelector("#wordList"),
+    jumpStageBtns: document.querySelectorAll("[data-jump-stage]")
+  };
+
+  const state = {
+    deck: [],
+    current: null,
+    useMissedOnly: false,
+    missed: new Map(),
+    stats: {
+      correct: 0,
+      checks: 0,
+      streak: 0
+    }
+  };
+
+  const modeLabels = {
+    spell: "Hear it, spell it",
+    missing: "Fill the missing letters",
+    mix: "Mix both games"
+  };
+
+  const trickyChunks = [
+    "eigh", "ough", "tion", "sion", "gion", "eous", "ious", "tious", "cious",
+    "eau", "oue", "ieu", "ai", "ay", "ea", "ee", "ei", "ie", "oa", "oe", "oi",
+    "oo", "ou", "ow", "ue", "ui", "au", "aw", "ew", "ar", "er", "ir", "or", "ur",
+    "ph", "qu", "ch", "sh", "th", "gh", "gn", "mb", "mn", "wr", "ck", "sc", "ti",
+    "ci", "si", "ge", "gy", "gue", "que", "ium", "ous", "ance", "ence", "able", "ible"
+  ].sort((a, b) => b.length - a.length);
+
+  function normalize(text) {
+    return String(text || "")
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/[\s._-]+/g, "");
+  }
+
+  function displayLevel(level) {
+    return level === "all" ? "All levels" : `Level ${level}`;
+  }
+
+  function getStageData() {
+    return window.WORD_BANK[els.stageSelect.value];
+  }
+
+  function uniqueEntries(entries) {
+    const seen = new Set();
+    return entries.filter((entry) => {
+      const key = normalize(entry.word);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function keyForEntry(entry) {
+    return `${entry.stageId}:${normalize(entry.word)}`;
+  }
+
+  function selectedEntries() {
+    const stageId = els.stageSelect.value;
+    const stage = window.WORD_BANK[stageId];
+    const selectedLevel = els.levelSelect.value;
+    const entries = [];
+
+    Object.entries(stage.levels).forEach(([level, words]) => {
+      if (selectedLevel !== "all" && selectedLevel !== level) return;
+      words.forEach((word) => entries.push({ stageId, stageLabel: stage.label, level, word }));
+    });
+
+    const unique = uniqueEntries(entries);
+    if (state.useMissedOnly) {
+      const missedKeys = new Set([...state.missed.keys()]);
+      return unique.filter((entry) => missedKeys.has(keyForEntry(entry)));
+    }
+    return unique;
+  }
+
+  function shuffle(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function refillDeck() {
+    state.deck = shuffle(selectedEntries());
+  }
+
+  function chooseMode() {
+    const selected = els.modeSelect.value;
+    if (selected !== "mix") return selected;
+    return Math.random() < 0.5 ? "spell" : "missing";
+  }
+
+  function makeMask(word) {
+    const chars = Array.from(word);
+    const lower = word.toLocaleLowerCase();
+    const matches = [];
+
+    trickyChunks.forEach((chunk) => {
+      let start = lower.indexOf(chunk);
+      while (start !== -1) {
+        const end = start + chunk.length;
+        if (start > 0 && end < chars.length) {
+          matches.push({ start, len: chunk.length, score: chunk.length * 3 });
+        }
+        start = lower.indexOf(chunk, start + 1);
+      }
+    });
+
+    let gap;
+    if (matches.length) {
+      const totalScore = matches.reduce((sum, item) => sum + item.score, 0);
+      let pick = Math.random() * totalScore;
+      gap = matches[0];
+      for (const item of matches) {
+        pick -= item.score;
+        if (pick <= 0) {
+          gap = item;
+          break;
+        }
+      }
+    } else {
+      const len = chars.length;
+      const gapLen = len <= 4 ? 1 : len <= 7 ? 2 : len <= 10 ? 3 : 4;
+      const start = Math.max(1, Math.floor((len - gapLen) / 2));
+      gap = { start, len: Math.min(gapLen, Math.max(1, len - 2)) };
+    }
+
+    const missing = chars.slice(gap.start, gap.start + gap.len).join("");
+    const masked = chars.map((char, index) => {
+      if (index >= gap.start && index < gap.start + gap.len) return "_";
+      return char;
+    }).join(" ");
+
+    return { masked, missing };
+  }
+
+  let preferredVoice = null;
+  let speakTimer = null;
+
+  function chooseBestVoice() {
+    if (!("speechSynthesis" in window)) return null;
+
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+
+    const scoreVoice = (voice) => {
+      const name = (voice.name || "").toLocaleLowerCase();
+      const lang = (voice.lang || "").toLocaleLowerCase();
+      let score = 0;
+
+      // iPad/iPhone Safari often exposes Apple voices such as Karen, Samantha, Daniel,
+      // Moira, Tessa, and sometimes Enhanced/Premium variants if installed.
+      if (lang === "en-au") score += 80;
+      else if (lang.startsWith("en-au")) score += 70;
+      else if (lang === "en-gb") score += 55;
+      else if (lang === "en-us") score += 50;
+      else if (lang.startsWith("en")) score += 35;
+
+      if (name.includes("karen")) score += 45;       // Clear Australian Apple voice
+      if (name.includes("samantha")) score += 42;    // Clear Apple US voice
+      if (name.includes("daniel")) score += 35;      // Clear Apple UK voice
+      if (name.includes("moira")) score += 30;
+      if (name.includes("tessa")) score += 25;
+
+      if (name.includes("enhanced")) score += 35;
+      if (name.includes("premium")) score += 35;
+      if (name.includes("neural")) score += 25;
+      if (name.includes("siri")) score += 20;
+
+      // Avoid lower-quality compact voices when a better option exists.
+      if (name.includes("compact")) score -= 45;
+      if (name.includes("novelty")) score -= 100;
+
+      return score;
+    };
+
+    return voices
+      .filter((voice) => (voice.lang || "").toLocaleLowerCase().startsWith("en"))
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a))[0] || voices[0] || null;
+  }
+
+  function refreshPreferredVoice() {
+    preferredVoice = chooseBestVoice();
+  }
+
+  if ("speechSynthesis" in window) {
+    refreshPreferredVoice();
+    window.speechSynthesis.onvoiceschanged = refreshPreferredVoice;
+  }
+
+  function speak(text) {
+    if (!("speechSynthesis" in window)) {
+      setFeedback("warn", "This browser does not support speech. Use fill-the-missing-letters mode instead.");
+      return;
+    }
+
+    // iPad Safari can occasionally queue or replay speech if cancel() and speak()
+    // happen too close together. This debounce keeps each button press to one utterance.
+    if (speakTimer) {
+      clearTimeout(speakTimer);
+      speakTimer = null;
+    }
+
+    window.speechSynthesis.cancel();
+
+    speakTimer = window.setTimeout(() => {
+      refreshPreferredVoice();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+        utterance.lang = preferredVoice.lang || "en-AU";
+      } else {
+        utterance.lang = "en-AU";
+      }
+
+      utterance.rate = Number(els.speedSelect.value || 0.85);
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      window.speechSynthesis.speak(utterance);
+      speakTimer = null;
+    }, 90);
+  }
+
+  function speakCurrent() {
+    if (!state.current) return;
+
+    // Say the word once only. The old version said:
+    // "Spell word. word." which sounded like double-speak on iPad.
+    speak(`Spell ${state.current.word}.`);
+  }
+
+  function renderWordList() {
+    const entries = selectedEntries();
+    els.poolCount.textContent = entries.length;
+    els.wordList.innerHTML = entries
+      .map((entry) => `<span class="word-chip">L${entry.level}: ${entry.word}</span>`)
+      .join("");
+  }
+
+  function renderBadges() {
+    const stage = getStageData();
+    els.stageBadge.textContent = stage.label;
+    els.levelBadge.textContent = displayLevel(els.levelSelect.value);
+    els.modeBadge.textContent = modeLabels[els.modeSelect.value];
+  }
+
+  function setFeedback(kind, message) {
+    els.feedback.className = `feedback ${kind || ""}`.trim();
+    els.feedback.textContent = message;
+  }
+
+  function renderStats() {
+    els.correctCount.textContent = state.stats.correct;
+    els.correctCount.parentElement.classList.add('stat-bounce');
+    setTimeout(() => els.correctCount.parentElement.classList.remove('stat-bounce'), 400);
+    
+    els.tryCount.textContent = state.stats.checks;
+    els.streakCount.textContent = state.stats.streak;
+    if (state.stats.streak > 0) {
+      els.streakCount.parentElement.classList.add('stat-bounce');
+      setTimeout(() => els.streakCount.parentElement.classList.remove('stat-bounce'), 400);
+    }
+    
+    els.missedBtn.disabled = state.missed.size === 0;
+  }
+
+  function resetForSelectionChange() {
+    state.useMissedOnly = false;
+    state.deck = [];
+    state.current = null;
+    renderBadges();
+    renderWordList();
+    els.prompt.textContent = "Press “New word” to begin.";
+    els.maskedWord.hidden = true;
+    els.maskedWord.textContent = "";
+    els.input.value = "";
+    els.hint.textContent = "Tip: in fill-the-missing-letters mode, type just the missing section or the whole word.";
+    setFeedback("", "");
+    updateQueryString();
+  }
+
+  function updateQueryString() {
+    const params = new URLSearchParams(window.location.search);
+    params.set("stage", els.stageSelect.value);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }
+
+  function newWord() {
+    const entries = selectedEntries();
+    if (!entries.length) {
+      state.useMissedOnly = false;
+      setFeedback("warn", "No missed words yet. Switching back to the full list.");
+      refillDeck();
+      renderWordList();
+      renderStats();
+      return;
+    }
+
+    if (!state.deck.length) refillDeck();
+    const entry = state.deck.pop();
+    const activeMode = chooseMode();
+    const mask = activeMode === "missing" ? makeMask(entry.word) : null;
+    state.current = { ...entry, mode: activeMode, mask, hadWrongTry: false, hintsUsed: 0 };
+
+    els.input.value = "";
+    els.input.focus();
+    els.levelBadge.textContent = `Level ${entry.level}`;
+    els.modeBadge.textContent = modeLabels[activeMode];
+    setFeedback("", "");
+
+    if (activeMode === "spell") {
+      els.prompt.textContent = `Listen, then spell the ${entry.word.length}-letter word.`;
+      els.maskedWord.hidden = true;
+      els.maskedWord.textContent = "";
+      els.hint.textContent = "Press “Say it again” as many times as you need.";
+      setTimeout(speakCurrent, 120);
+    } else {
+      els.prompt.textContent = "Fill the missing section.";
+      els.maskedWord.hidden = false;
+      els.maskedWord.textContent = mask.masked;
+      els.hint.textContent = `Type the missing ${mask.missing.length} letter${mask.missing.length === 1 ? "" : "s"}, or type the whole word.`;
+    }
+  }
+
+  function reveal() {
+    if (!state.current) return;
+    const word = state.current.word;
+    els.maskedWord.hidden = false;
+    els.maskedWord.textContent = Array.from(word).join(" ");
+    setFeedback("warn", `The word is “${word}”.`);
+    state.missed.set(keyForEntry(state.current), state.current);
+    renderStats();
+  }
+
+  function giveHint() {
+    if (!state.current) return;
+    const word = state.current.word;
+    state.current.hintsUsed += 1;
+    const letters = Array.from(word);
+
+    if (state.current.mode === "missing" && state.current.mask) {
+      const missing = state.current.mask.missing;
+      els.hint.textContent = `Missing section starts with “${missing[0]}” and has ${missing.length} letter${missing.length === 1 ? "" : "s"}.`;
+      return;
+    }
+
+    if (state.current.hintsUsed === 1) {
+      els.hint.textContent = `Hint: it starts with “${letters[0]}” and has ${letters.length} letters.`;
+    } else if (state.current.hintsUsed === 2) {
+      els.hint.textContent = `Hint: it ends with “${letters[letters.length - 1]}”.`;
+    } else {
+      const middle = letters.map((letter, index) => {
+        if (index === 0 || index === letters.length - 1) return letter;
+        return "_";
+      }).join(" ");
+      els.maskedWord.hidden = false;
+      els.maskedWord.textContent = middle;
+      els.hint.textContent = "Here are the first and last letters.";
+    }
+  }
+
+  function markMissed(entry) {
+    state.missed.set(keyForEntry(entry), entry);
+  }
+
+  function checkAnswer(event) {
+    event.preventDefault();
+    if (!state.current) {
+      newWord();
+      return;
+    }
+
+    const guess = normalize(els.input.value);
+    if (!guess) {
+      setFeedback("warn", "Type an answer first.");
+      return;
+    }
+
+    const wordKey = normalize(state.current.word);
+    const missingKey = state.current.mask ? normalize(state.current.mask.missing) : "";
+    const isCorrect = guess === wordKey || (state.current.mode === "missing" && guess === missingKey);
+
+    state.stats.checks += 1;
+
+    if (isCorrect) {
+      state.stats.correct += 1;
+      state.stats.streak += 1;
+      state.missed.delete(keyForEntry(state.current));
+      els.maskedWord.hidden = false;
+      els.maskedWord.textContent = Array.from(state.current.word).join(" ");
+      setFeedback("good", `Correct! ${state.current.word}`);
+      celebration.celebrate();
+      renderStats();
+      setTimeout(() => {
+        if (state.current) newWord();
+      }, 850);
+      return;
+    }
+
+    state.stats.streak = 0;
+    state.current.hadWrongTry = true;
+    markMissed(state.current);
+    setFeedback("bad", "Not quite. Try again, use Hint, or press Reveal.");
+    celebration.notifyError();
+    renderStats();
+  }
+
+  function reviewMissed() {
+    if (!state.missed.size) return;
+    state.useMissedOnly = true;
+    state.deck = shuffle([...state.missed.values()]);
+    setFeedback("warn", `Reviewing ${state.deck.length} missed word${state.deck.length === 1 ? "" : "s"}.`);
+    renderWordList();
+    newWord();
+  }
+
+  function applyInitialParams() {
+    const params = new URLSearchParams(window.location.search);
+    const stage = params.get("stage");
+    if (stage && window.WORD_BANK[stage]) els.stageSelect.value = stage;
+  }
+
+  // Sound toggle
+  els.soundToggle.addEventListener("click", () => {
+    sounds.soundEnabled = !sounds.soundEnabled;
+    els.soundToggle.textContent = sounds.soundEnabled ? "🔊 Sound" : "🔇 Sound";
+    els.soundToggle.title = sounds.soundEnabled ? "Turn sound off" : "Turn sound on";
+    localStorage.setItem("spellingBee_soundEnabled", sounds.soundEnabled);
+  });
+
+  // Load sound preference from localStorage
+  const savedSoundPref = localStorage.getItem("spellingBee_soundEnabled");
+  if (savedSoundPref === "true") {
+    sounds.soundEnabled = true;
+    els.soundToggle.textContent = "🔊 Sound";
+    els.soundToggle.title = "Turn sound off";
+  }
+
+  els.form.addEventListener("submit", checkAnswer);
+  els.newWordBtn.addEventListener("click", newWord);
+  els.speakBtn.addEventListener("click", speakCurrent);
+  els.revealBtn.addEventListener("click", reveal);
+  els.hintBtn.addEventListener("click", giveHint);
+  els.missedBtn.addEventListener("click", reviewMissed);
+
+  [els.stageSelect, els.levelSelect, els.modeSelect].forEach((select) => {
+    select.addEventListener("change", resetForSelectionChange);
+  });
+
+  els.speedSelect.addEventListener("change", () => {
+    if (state.current && state.current.mode === "spell") speakCurrent();
+  });
+
+  els.jumpStageBtns.forEach((button) => {
+    button.addEventListener("click", () => {
+      els.stageSelect.value = button.dataset.jumpStage;
+      els.levelSelect.value = "all";
+      els.modeSelect.value = "mix";
+      resetForSelectionChange();
+      newWord();
+    });
+  });
+
+  applyInitialParams();
+  renderBadges();
+  renderWordList();
+  renderStats();
+})();
+
+</script>
+</body>
+</html>

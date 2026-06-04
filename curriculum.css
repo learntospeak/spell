@@ -383,6 +383,75 @@ h2 {
   font-weight: 750;
 }
 
+.celebration-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #4caf50;
+  animation: confetti-fall 2.5s ease-in forwards;
+}
+
+.confetti.type-0 {
+  background: #ff6b6b;
+}
+
+.confetti.type-1 {
+  background: #4ecdc4;
+}
+
+.confetti.type-2 {
+  background: #ffe66d;
+}
+
+.confetti.type-3 {
+  background: #95e1d3;
+}
+
+.confetti.type-4 {
+  background: #f38181;
+}
+
+.confetti.type-5 {
+  background: #aa96da;
+}
+
+.celebration-emoji {
+  position: absolute;
+  font-size: 3rem;
+  animation: emoji-rise 1.5s ease-out forwards;
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes emoji-rise {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-60px) scale(1.2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) scale(0.8);
+  }
+}
+
 body[data-subject="maths"] {
   --accent: var(--maths);
   --accent-dark: #0f5264;

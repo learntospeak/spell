@@ -9,7 +9,7 @@
         type: "choice",
         prompt: "Which fraction is bigger?",
         detail: "Think about how many equal parts are shaded.",
-        choices: ["1/2", "1/4", "They are the same"],
+        choices: ["1/2", "1/4", "They are the same", "1/8"],
         answer: "1/2",
         hint: "When the top number is the same, fewer bottom parts means bigger pieces."
       },
@@ -37,7 +37,7 @@
         type: "choice",
         prompt: "Which is equivalent to 3/4?",
         detail: "Equivalent means the same amount split into different sized pieces.",
-        choices: ["6/8", "4/6", "3/8"],
+        choices: ["6/8", "4/6", "3/8", "9/16"],
         answer: "6/8",
         hint: "Multiply the top and bottom by the same number."
       },
@@ -67,7 +67,7 @@
         type: "choice",
         prompt: "Which sentence is punctuated correctly?",
         detail: "Look for the capital letter and ending mark.",
-        choices: ["we went to the park.", "We went to the park.", "We went to the park"],
+        choices: ["we went to the park.", "We went to the park.", "We went to the park", "we went to the park"],
         answer: "We went to the park.",
         hint: "A sentence starts with a capital and ends with punctuation."
       },
@@ -77,7 +77,7 @@
         type: "choice",
         prompt: "Which word is the strongest verb?",
         detail: "The sentence is: The dog ___ across the yard.",
-        choices: ["went", "moved", "sprinted"],
+        choices: ["went", "moved", "sprinted", "was"],
         answer: "sprinted",
         hint: "Choose the word that gives the clearest picture."
       },
@@ -87,7 +87,7 @@
         type: "choice",
         prompt: "Mia packed an umbrella because dark clouds covered the sky. Why did Mia pack it?",
         detail: "Find the clue in the sentence.",
-        choices: ["She thought it might rain.", "She was going swimming.", "She wanted shade."],
+        choices: ["She thought it might rain.", "She was going swimming.", "She wanted shade.", "She lost her umbrella."],
         answer: "She thought it might rain.",
         hint: "Dark clouds are usually a clue about weather."
       },
@@ -97,7 +97,7 @@
         type: "choice",
         prompt: "Which sentence uses commas best?",
         detail: "The list has three things.",
-        choices: ["I packed socks, lunch, and a torch.", "I packed socks lunch, and a torch.", "I packed, socks lunch and a torch."],
+        choices: ["I packed socks, lunch, and a torch.", "I packed socks lunch, and a torch.", "I packed, socks lunch and a torch.", "I packed socks lunch and, a torch."],
         answer: "I packed socks, lunch, and a torch.",
         hint: "Commas separate items in a list."
       },
@@ -107,7 +107,7 @@
         type: "choice",
         prompt: "Tom stared at the trophy cabinet and tightened his shoelaces. What can you infer?",
         detail: "Use clues, not just exact words.",
-        choices: ["He wants to do well in sport.", "He forgot his lunch.", "He is cleaning the cabinet."],
+        choices: ["He wants to do well in sport.", "He forgot his lunch.", "He is cleaning the cabinet.", "He is looking for a book."],
         answer: "He wants to do well in sport.",
         hint: "Trophy plus shoelaces points to sport or competition."
       },
@@ -117,7 +117,7 @@
         type: "choice",
         prompt: "Which revision is clearest?",
         detail: "Original: The storm was bad.",
-        choices: ["The storm smashed branches across the road.", "The storm was really very bad.", "The storm happened."],
+        choices: ["The storm smashed branches across the road.", "The storm was really very bad.", "The storm happened.", "The bad storm was bad."],
         answer: "The storm smashed branches across the road.",
         hint: "Specific details usually beat vague adjectives."
       }
@@ -129,7 +129,7 @@
         type: "choice",
         prompt: "Which material is best for keeping water in a cup?",
         detail: "Think about properties, not colour.",
-        choices: ["Plastic", "Tissue paper", "Cotton wool"],
+        choices: ["Plastic", "Tissue paper", "Cotton wool", "Cardboard"],
         answer: "Plastic",
         hint: "The best choice does not soak up water."
       },
@@ -139,7 +139,7 @@
         type: "choice",
         prompt: "Which is evidence that something is living?",
         detail: "Look for life processes.",
-        choices: ["It grows and needs food.", "It is shiny.", "It makes a loud sound."],
+        choices: ["It grows and needs food.", "It is shiny.", "It makes a loud sound.", "It is heavy."],
         answer: "It grows and needs food.",
         hint: "Living things need energy and change over time."
       },
@@ -149,7 +149,7 @@
         type: "choice",
         prompt: "A ball slows down as it rolls over carpet. What force is acting on it?",
         detail: "The surface is rubbing against the ball.",
-        choices: ["Friction", "Gravity only", "Magnetism"],
+        choices: ["Friction", "Gravity only", "Magnetism", "Evaporation"],
         answer: "Friction",
         hint: "Friction happens when surfaces rub together."
       },
@@ -159,7 +159,7 @@
         type: "choice",
         prompt: "You test which soil grows beans best. What should stay the same?",
         detail: "Only one thing should change in a fair test.",
-        choices: ["Amount of water and sunlight", "The type of soil", "The result"],
+        choices: ["Amount of water and sunlight", "The type of soil", "The result", "The question"],
         answer: "Amount of water and sunlight",
         hint: "Keep everything the same except what you are testing."
       },
@@ -169,7 +169,7 @@
         type: "choice",
         prompt: "Why do shadows change during the day?",
         detail: "Think about the Sun's position in the sky.",
-        choices: ["The Sun appears to move across the sky.", "The object gets smaller.", "The ground turns."],
+        choices: ["The Sun appears to move across the sky.", "The object gets smaller.", "The ground turns.", "The shadow chooses a new direction."],
         answer: "The Sun appears to move across the sky.",
         hint: "A shadow points away from the light source."
       },
@@ -179,7 +179,7 @@
         type: "choice",
         prompt: "Which change shows electrical energy becoming light energy?",
         detail: "Follow the energy from source to result.",
-        choices: ["A lamp turning on", "Ice melting", "A paper plane falling"],
+        choices: ["A lamp turning on", "Ice melting", "A paper plane falling", "A book sitting on a shelf"],
         answer: "A lamp turning on",
         hint: "Electricity enters the device, and light comes out."
       }
@@ -206,11 +206,96 @@
   };
 
   const storageKey = `skillHub_${subject}_progress`;
+  const soundStorageKey = "skillHub_soundEnabled";
   const state = {
-    pool: [],
     current: null,
-    progress: readProgress()
+    progress: readProgress(),
+    soundEnabled: localStorage.getItem(soundStorageKey) === "true"
   };
+
+  const celebration = {
+    emojis: ["🎉", "⭐", "🎊", "✨", "🏆", "👏"],
+
+    playSuccess() {
+      playTone([
+        { frequency: 760, start: 0, duration: 0.11 },
+        { frequency: 1080, start: 0.1, duration: 0.18 }
+      ], 0.22);
+    },
+
+    playError() {
+      playTone([
+        { frequency: 260, start: 0, duration: 0.12 },
+        { frequency: 190, start: 0.12, duration: 0.16 }
+      ], 0.18);
+    },
+
+    createConfetti() {
+      const container = document.querySelector("#celebrationContainer");
+      if (!container) return;
+
+      for (let i = 0; i < 30; i += 1) {
+        const confetti = document.createElement("div");
+        confetti.className = `confetti type-${i % 6}`;
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = "-10px";
+        confetti.style.animationDelay = `${Math.random() * 0.25}s`;
+        confetti.style.animationDuration = `${2.2 + Math.random() * 0.7}s`;
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        container.appendChild(confetti);
+        window.setTimeout(() => confetti.remove(), 3200);
+      }
+    },
+
+    createEmojis() {
+      const container = document.querySelector("#celebrationContainer");
+      if (!container) return;
+
+      for (let i = 0; i < 3; i += 1) {
+        const emoji = document.createElement("div");
+        emoji.className = "celebration-emoji";
+        emoji.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+        emoji.style.left = `${30 + Math.random() * 40}%`;
+        emoji.style.top = "50%";
+        emoji.style.animationDelay = `${i * 0.15}s`;
+        container.appendChild(emoji);
+        window.setTimeout(() => emoji.remove(), 1600);
+      }
+    },
+
+    celebrate() {
+      this.createConfetti();
+      this.createEmojis();
+      this.playSuccess();
+    },
+
+    notifyError() {
+      this.playError();
+    }
+  };
+
+  function playTone(notes, volume) {
+    if (!state.soundEnabled) return;
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const gain = audioContext.createGain();
+      const now = audioContext.currentTime;
+
+      gain.connect(audioContext.destination);
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+
+      notes.forEach((note) => {
+        const osc = audioContext.createOscillator();
+        osc.connect(gain);
+        osc.frequency.setValueAtTime(note.frequency, now + note.start);
+        osc.start(now + note.start);
+        osc.stop(now + note.start + note.duration);
+      });
+    } catch (error) {
+      // Browsers can block audio before a user gesture; the app still works silently.
+    }
+  }
 
   function readProgress() {
     try {
@@ -254,6 +339,23 @@
     return weakSlice[Math.floor(Math.random() * weakSlice.length)];
   }
 
+  function shuffle(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   function renderSkills() {
     const skills = [...new Set(activities[subject].map((item) => item.skill))].sort();
     els.skill.innerHTML = '<option value="all">All skills</option>' + skills
@@ -284,8 +386,8 @@
     els.choices.innerHTML = "";
 
     if (item.type === "choice") {
-      els.choices.innerHTML = item.choices
-        .map((choice) => `<button type="button" class="choice" data-answer="${choice}">${choice}</button>`)
+      els.choices.innerHTML = shuffle(item.choices)
+        .map((choice) => `<button type="button" class="choice" data-answer="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`)
         .join("");
     }
   }
@@ -316,12 +418,14 @@
     if (correct) {
       els.feedback.className = "feedback good";
       els.feedback.textContent = "Correct. Nice thinking.";
+      celebration.celebrate();
       window.setTimeout(renderQuestion, 850);
       return;
     }
 
     els.feedback.className = "feedback bad";
     els.feedback.textContent = `Not quite. ${state.current.hint}`;
+    celebration.notifyError();
   }
 
   function renderProgress() {
@@ -382,6 +486,7 @@
   renderSkills();
   renderProgress();
   renderQuestion();
+  renderSoundToggle();
 
   els.stage.addEventListener("change", renderQuestion);
   els.skill.addEventListener("change", renderQuestion);
@@ -409,5 +514,18 @@
     if (!state.current) return;
     els.hint.dataset.used = "true";
     els.hint.textContent = state.current.hint;
+  });
+
+  function renderSoundToggle() {
+    const button = document.querySelector("#soundToggle");
+    if (!button) return;
+    button.textContent = state.soundEnabled ? "Sound on" : "Sound off";
+    button.title = state.soundEnabled ? "Turn sound off" : "Turn sound on";
+  }
+
+  document.querySelector("#soundToggle").addEventListener("click", () => {
+    state.soundEnabled = !state.soundEnabled;
+    localStorage.setItem(soundStorageKey, String(state.soundEnabled));
+    renderSoundToggle();
   });
 })();

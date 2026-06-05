@@ -359,6 +359,12 @@ button.ghost {
   margin-top: 12px;
 }
 
+.database-login-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  gap: 10px;
+}
+
 .private-bank-status {
   min-height: 24px;
   margin: 10px 0 0;
@@ -470,6 +476,10 @@ button.ghost {
     grid-template-columns: 1fr;
   }
 
+  .database-login-form {
+    grid-template-columns: 1fr;
+  }
+
   .button-row,
   .quick-links {
     display: grid;
@@ -547,12 +557,15 @@ button.ghost {
       <div class="meta-row">
         <span class="badge">Database list</span>
       </div>
-      <form class="answer-form" autocomplete="off">
-        <label class="sr-only" for="privateBankInput">Database list file</label>
-        <input id="privateBankInput" type="file" accept=".js,.json,application/json,text/javascript,text/plain" />
+      <form id="databaseLoginForm" class="database-login-form" autocomplete="off">
+        <label class="sr-only" for="databaseUsername">Username</label>
+        <input id="databaseUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Username" />
+        <label class="sr-only" for="databasePassword">Password</label>
+        <input id="databasePassword" type="password" autocomplete="current-password" placeholder="Password" />
+        <button type="submit" class="primary" id="unlockDatabaseBtn">Unlock</button>
         <button type="button" class="primary" id="clearPrivateBankBtn">Clear</button>
       </form>
-      <p id="privateBankStatus" class="private-bank-status">Choose database-list.js to unlock practice on this browser.</p>
+      <p id="privateBankStatus" class="private-bank-status">Log in to unlock the spelling database on this browser.</p>
     </section>
 
     <section class="card" aria-live="polite">
@@ -757,7 +770,10 @@ window.WORD_BANK = {
     missedBtn: document.querySelector("#missedBtn"),
     soundToggle: document.querySelector("#soundToggle"),
     privateBankPanel: document.querySelector("#privateBankPanel"),
-    privateBankInput: document.querySelector("#privateBankInput"),
+    databaseLoginForm: document.querySelector("#databaseLoginForm"),
+    databaseUsername: document.querySelector("#databaseUsername"),
+    databasePassword: document.querySelector("#databasePassword"),
+    unlockDatabaseBtn: document.querySelector("#unlockDatabaseBtn"),
     privateBankStatus: document.querySelector("#privateBankStatus"),
     clearPrivateBankBtn: document.querySelector("#clearPrivateBankBtn"),
     correctCount: document.querySelector("#correctCount"),
@@ -788,6 +804,8 @@ window.WORD_BANK = {
   };
 
   const privateBankStorageKey = "spellingBee_privateWordBank";
+  const protectedBankUrl = "database-list.enc.json";
+  const protectedBankUsername = "poppy";
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
   const letterWords = {
@@ -907,7 +925,7 @@ window.WORD_BANK = {
     });
 
     if (!Object.keys(levels).length) {
-      throw new Error("No words found in the selected file.");
+      throw new Error("No words found in the database.");
     }
 
     return {
@@ -918,17 +936,54 @@ window.WORD_BANK = {
     };
   }
 
-  function parsePrivateWordBank(text) {
-    const trimmed = String(text || "").trim();
-    if (!trimmed) throw new Error("Selected file is empty.");
+  function base64ToBytes(value) {
+    const binary = window.atob(value);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    return bytes;
+  }
 
-    if (trimmed.startsWith("{")) {
-      return validateWordBank(JSON.parse(trimmed));
+  async function decryptProtectedWordBank(password) {
+    if (!window.crypto || !window.crypto.subtle) {
+      throw new Error("This browser cannot unlock the protected database.");
     }
 
-    const sandbox = {};
-    const result = Function("window", `${trimmed}\nreturn window.WORD_BANK;`)(sandbox);
-    return validateWordBank(result);
+    const response = await fetch(protectedBankUrl, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("The encrypted database is not available yet. Refresh in a minute.");
+    }
+
+    const payload = await response.json();
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      encoder.encode(password),
+      "PBKDF2",
+      false,
+      ["deriveKey"]
+    );
+    const key = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: base64ToBytes(payload.salt),
+        iterations: payload.iterations,
+        hash: "SHA-256"
+      },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+    const plainBytes = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: base64ToBytes(payload.iv) },
+      key,
+      base64ToBytes(payload.ciphertext)
+    );
+
+    return validateWordBank(JSON.parse(decoder.decode(plainBytes)));
   }
 
   function applyPrivateWordBank(wordBank, shouldSave) {
@@ -962,7 +1017,7 @@ window.WORD_BANK = {
     els.privateBankPanel.hidden = hasWords;
     els.privateBankStatus.textContent = hasWords
       ? `Loaded ${wordBankCount()} private words.`
-      : "Choose database-list.js to unlock practice on this browser.";
+      : "Log in to unlock the spelling database on this browser.";
   }
 
   function uniqueEntries(entries) {
@@ -1357,7 +1412,7 @@ window.WORD_BANK = {
       const hasWords = hasWordBankWords();
       setFeedback("warn", hasWords
         ? "No missed words yet. Switching back to the full list."
-        : "Choose database-list.js above to unlock practice.");
+        : "Log in above to unlock practice.");
       refillDeck();
       renderWordList();
       renderStats();
@@ -1560,17 +1615,29 @@ window.WORD_BANK = {
     els.soundToggle.title = "Turn sound off";
   }
 
-  els.privateBankInput.addEventListener("change", async () => {
-    const file = els.privateBankInput.files && els.privateBankInput.files[0];
-    if (!file) return;
+  els.databaseLoginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const username = normalize(els.databaseUsername.value);
+    const password = els.databasePassword.value;
+
+    if (username !== protectedBankUsername || !password) {
+      els.privateBankStatus.textContent = "Check the username and password.";
+      setFeedback("bad", "Could not unlock the spelling database.");
+      return;
+    }
+
+    els.unlockDatabaseBtn.disabled = true;
+    els.privateBankStatus.textContent = "Unlocking database...";
 
     try {
-      const text = await file.text();
-      applyPrivateWordBank(parsePrivateWordBank(text), true);
-      els.privateBankInput.value = "";
+      const wordBank = await decryptProtectedWordBank(password);
+      applyPrivateWordBank(wordBank, true);
+      els.databasePassword.value = "";
     } catch (error) {
-      els.privateBankStatus.textContent = "That file did not look like a database list.";
-      setFeedback("bad", error.message || "Could not load the selected word bank.");
+      els.privateBankStatus.textContent = "Check the username and password.";
+      setFeedback("bad", error.message || "Could not unlock the spelling database.");
+    } finally {
+      els.unlockDatabaseBtn.disabled = false;
     }
   });
 

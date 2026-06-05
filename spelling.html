@@ -78,6 +78,19 @@ h1 {
   font-size: 1.08rem;
 }
 
+.stage-banner {
+  margin: 18px 0 0;
+  border: 1px solid #f0c95f;
+  border-radius: 18px;
+  padding: 14px 18px;
+  background: #fff6d6;
+  color: #6f4e00;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(111, 78, 0, 0.12);
+}
+
 .controls,
 .quick-links,
 .stats,
@@ -445,17 +458,17 @@ button.ghost {
   <div id="celebrationContainer" class="celebration-container"></div>
   <main class="app-shell">
     <header class="hero">
-      <p class="eyebrow">Stage 2 + Stage 3</p>
+      <p class="eyebrow">Poppy Phase 3</p>
       <h1>Spelling Bee Trainer</h1>
       <p class="subhead">Three quick practice games: listen and spell, voice spelling, or fill the missing section.</p>
+      <div class="stage-banner">Congratulations for making it to stage - set your eyes on state now!</div>
     </header>
 
     <section class="controls" aria-label="Practice settings">
       <label>
         Child / stage
         <select id="stageSelect">
-          <option value="2">Stage 2</option>
-          <option value="3">Stage 3</option>
+          <option value="3">Poppy Phase 3</option>
         </select>
       </label>
 
@@ -463,11 +476,11 @@ button.ghost {
         Level
         <select id="levelSelect">
           <option value="all">All levels</option>
-          <option value="1">Level 1</option>
           <option value="2">Level 2</option>
           <option value="3">Level 3</option>
           <option value="4">Level 4</option>
           <option value="5">Level 5</option>
+          <option value="6">Level 6</option>
         </select>
       </label>
 
@@ -493,15 +506,14 @@ button.ghost {
 
     <section class="quick-links" aria-label="Quick stage links">
       <a href="index.html">Subject menu</a>
-      <button type="button" class="ghost" data-jump-stage="2">Stage 2 quick start</button>
-      <button type="button" class="ghost" data-jump-stage="3">Stage 3 quick start</button>
+      <button type="button" class="ghost" data-jump-stage="3">Poppy Phase 3 quick start</button>
       <button type="button" class="ghost" id="missedBtn" disabled>Review missed words</button>
       <button type="button" class="ghost" id="soundToggle" title="Toggle sound effects (currently off)">🔇 Sound</button>
     </section>
 
     <section class="card" aria-live="polite">
       <div class="meta-row">
-        <span id="stageBadge" class="badge">Stage 2</span>
+        <span id="stageBadge" class="badge">Poppy Phase 3</span>
         <span id="levelBadge" class="badge muted">All levels</span>
         <span id="modeBadge" class="badge muted">Hear it, spell it</span>
       </div>
@@ -513,7 +525,7 @@ button.ghost {
       <form id="answerForm" class="answer-form" autocomplete="off">
         <label class="sr-only" for="answerInput">Your answer</label>
         <input id="answerInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type the spelling here" />
-        <button type="submit" class="primary">Check</button>
+        <button type="submit" class="primary" id="checkBtn">Check</button>
       </form>
 
       <div class="button-row">
@@ -553,79 +565,17 @@ button.ghost {
   </main>
 
   <script>
-// Word bank transcribed from the Stage 2 and Stage 3 spelling bee sheets.
-// Edit this file if you spot a typo on the printed sheets.
+// Protected PSB words are loaded from private-word-bank.js, which is intentionally
+// kept out of git so the wordlist is not accidentally published.
 window.WORD_BANK = {
-  "2": {
-    label: "Stage 2",
-    levels: {
-      "1": [
-        "bang", "chin", "snow", "black", "mint", "song", "race", "team",
-        "party", "storm", "rash", "left", "sky", "shoe", "start", "sheep",
-        "tail", "paint", "spoon", "fair", "wild", "space", "meat", "party",
-        "goat", "stage", "story", "fork", "total", "stamp", "lime", "letter", "barn"
-      ],
-      "2": [
-        "sumo", "puck", "inlet", "Peru", "talent", "strum", "orbit", "yelp",
-        "young", "vase", "marble", "basket", "cabin", "broad", "antler", "dawn",
-        "tower", "France", "thunder", "salad", "worm", "title", "tact", "spine",
-        "holy", "skill", "mince", "vine", "zest", "royal", "trust", "Norway", "stage"
-      ],
-      "3": [
-        "coupon", "balance", "strange", "survey", "tantrum", "quiver", "voice", "rissole",
-        "thirsty", "onion", "sugar", "Saturn", "oblong", "statue", "author", "Brazil",
-        "myth", "wrist", "picture", "canyon", "require", "quickly", "practical", "mammal",
-        "landscape", "cotton", "thought", "fourteen", "awful", "afford", "history", "argue", "creative"
-      ],
-      "4": [
-        "beautiful", "apology", "certificate", "antelope", "maximum", "mischief", "luggage", "naughty",
-        "texture", "margarine", "caution", "negotiate", "polyester", "appetite", "divisible", "medley",
-        "tranquil", "drought", "Europe", "forfeit", "rhombus", "platoon", "ache", "influenza",
-        "mosquito", "pursuit", "receive", "patience", "reindeer"
-      ],
-      "5": [
-        "centaur", "ecstasy", "besiege", "amateur", "Paraguay", "critique", "deodorant", "plateau",
-        "precipice", "antonym", "brioche", "righteous", "tertiary", "tenacious", "camellia", "superstitious",
-        "meringue", "Zimbabwe", "euphemism", "pandemonium", "peripheral", "abseiling", "seismology"
-      ]
-    }
-  },
   "3": {
-    label: "Stage 3",
-    levels: {
-      "1": [
-        "bowl", "corn", "lake", "many", "owl", "rain", "river", "Rome",
-        "storm", "vote", "round", "shoe", "sale", "surf", "taxi", "vote",
-        "skim", "sleep", "inside", "green", "goat", "farmer", "church", "click",
-        "Japan", "brain", "ace", "army", "France", "jelly", "smile"
-      ],
-      "2": [
-        "forty", "guess", "video", "further", "script", "idol", "giant", "ambush",
-        "cyclone", "breakfast", "energy", "engine", "bushwalking", "holiday", "suffix", "fencing",
-        "goggles", "fraction", "iceberg", "mushroom", "rodeo", "health", "lounge", "grammar",
-        "Britain", "stencil", "salami", "captain", "theme", "mirror", "instead"
-      ],
-      "3": [
-        "president", "metallic", "clearance", "Uluru", "cautious", "paramedic", "carnivore", "umbrella",
-        "royalty", "tentacle", "violence", "phantom", "protein", "archery", "calculator", "typhoon",
-        "Pakistan", "wallaroo", "nourish", "cautious", "substantial", "urgency", "recognition", "amusement",
-        "athletics", "lifeguard", "restaurant", "terrify", "balcony", "abdomen", "pedestal"
-      ],
-      "4": [
-        "counterfeit", "deliberately", "conspiracy", "delinquent", "controversial", "distraught", "jeopardy",
-        "inflammation", "intuition", "marvellous", "vulnerable", "parenthesis", "moustache", "magnesium",
-        "literature", "Antarctica", "chemistry", "concussion", "equestrian", "toboggan"
-      ],
-      "5": [
-        "buoyant", "cologne", "iridescent", "pharmaceutical", "paradigm", "liaison", "picturesque", "crustacean",
-        "Guatemala", "continuum", "gymkhana", "spinnaker", "saboteur", "hieroglyphics", "ratatouille", "subpoena",
-        "connoisseur", "courgette", "rheumatism", "effervescent"
-      ]
-    }
+    label: "Poppy Phase 3",
+    levels: {}
   }
 };
 
 </script>
+  <script src="private-word-bank.js"></script>
   <script>
 (() => {
   "use strict";
@@ -754,6 +704,7 @@ window.WORD_BANK = {
     hint: document.querySelector("#hint"),
     form: document.querySelector("#answerForm"),
     input: document.querySelector("#answerInput"),
+    checkBtn: document.querySelector("#checkBtn"),
     feedback: document.querySelector("#feedback"),
     newWordBtn: document.querySelector("#newWordBtn"),
     speakBtn: document.querySelector("#speakBtn"),
@@ -1186,9 +1137,19 @@ window.WORD_BANK = {
   }
 
   function renderModeControls() {
+    const isCopyPractice = Boolean(state.current && state.current.copyPracticeRemaining);
     const isVoiceMode = state.current ? state.current.mode === "voice" : els.modeSelect.value === "voice";
     els.listenBtn.hidden = !isVoiceMode;
-    els.input.placeholder = isVoiceMode ? "Voice spelling will appear here" : "Type the spelling here";
+    els.newWordBtn.disabled = isCopyPractice;
+    els.hintBtn.disabled = isCopyPractice;
+    els.revealBtn.disabled = isCopyPractice;
+    els.stageSelect.disabled = isCopyPractice;
+    els.levelSelect.disabled = isCopyPractice;
+    els.modeSelect.disabled = isCopyPractice;
+    els.checkBtn.textContent = isCopyPractice ? "Practice" : "Check";
+    els.input.placeholder = isCopyPractice
+      ? "Type the word exactly"
+      : isVoiceMode ? "Voice spelling will appear here" : "Type the spelling here";
   }
 
   function setFeedback(kind, message) {
@@ -1253,10 +1214,19 @@ window.WORD_BANK = {
   }
 
   function newWord() {
+    if (state.current && state.current.copyPracticeRemaining > 0) {
+      setFeedback("bad", `Type “${state.current.word}” ${state.current.copyPracticeRemaining} more time${state.current.copyPracticeRemaining === 1 ? "" : "s"} first.`);
+      els.input.focus();
+      return;
+    }
+
     const entries = selectedEntries();
     if (!entries.length) {
       state.useMissedOnly = false;
-      setFeedback("warn", "No missed words yet. Switching back to the full list.");
+      const hasWords = Object.values(getStageData().levels).some((words) => words.length);
+      setFeedback("warn", hasWords
+        ? "No missed words yet. Switching back to the full list."
+        : "Private word bank is missing. Keep private-word-bank.js beside this file.");
       refillDeck();
       renderWordList();
       renderStats();
@@ -1267,7 +1237,7 @@ window.WORD_BANK = {
     const entry = state.deck.pop();
     const activeMode = chooseMode();
     const mask = activeMode === "missing" ? makeMask(entry.word) : null;
-    state.current = { ...entry, mode: activeMode, mask, hadWrongTry: false, hintsUsed: 0 };
+    state.current = { ...entry, mode: activeMode, mask, hadWrongTry: false, hintsUsed: 0, copyPracticeRemaining: 0 };
 
     els.input.value = "";
     els.input.focus();
@@ -1339,6 +1309,51 @@ window.WORD_BANK = {
     state.missed.set(keyForEntry(entry), entry);
   }
 
+  function startCopyPractice(rawTranscript) {
+    const word = state.current.word;
+    state.current.copyPracticeRemaining = 5;
+    state.stats.streak = 0;
+    state.current.hadWrongTry = true;
+    markMissed(state.current);
+    els.maskedWord.hidden = false;
+    els.maskedWord.textContent = Array.from(word).join(" ");
+    els.input.value = "";
+    els.input.focus();
+    els.hint.textContent = "Type the full word correctly 5 times to unlock the next word.";
+    setFeedback("bad", rawTranscript
+      ? `I heard "${rawTranscript.trim()}". Now type “${word}” 5 times.`
+      : `Not quite. Now type “${word}” 5 times.`);
+    celebration.notifyError();
+    renderModeControls();
+    renderStats();
+  }
+
+  function handleCopyPractice(guess) {
+    const word = state.current.word;
+    const wordKey = normalize(word);
+
+    if (guess !== wordKey) {
+      els.input.value = "";
+      setFeedback("bad", `Copy practice: type “${word}” exactly. ${state.current.copyPracticeRemaining} to go.`);
+      celebration.notifyError();
+      return;
+    }
+
+    state.current.copyPracticeRemaining -= 1;
+    els.input.value = "";
+
+    if (state.current.copyPracticeRemaining > 0) {
+      setFeedback("warn", `Good copy. Type “${word}” ${state.current.copyPracticeRemaining} more time${state.current.copyPracticeRemaining === 1 ? "" : "s"}.`);
+      return;
+    }
+
+    setFeedback("good", `Practice complete. Great reset on “${word}”.`);
+    renderModeControls();
+    setTimeout(() => {
+      if (state.current && state.current.copyPracticeRemaining === 0) newWord();
+    }, 900);
+  }
+
   function checkAnswer(event, providedGuess, rawTranscript) {
     if (event) event.preventDefault();
     if (!state.current) {
@@ -1353,6 +1368,11 @@ window.WORD_BANK = {
     }
 
     const wordKey = normalize(state.current.word);
+    if (state.current.copyPracticeRemaining > 0) {
+      handleCopyPractice(guess);
+      return;
+    }
+
     const missingKey = state.current.mask ? normalize(state.current.mask.missing) : "";
     const isCorrect = guess === wordKey || (state.current.mode === "missing" && guess === missingKey);
 
@@ -1375,12 +1395,7 @@ window.WORD_BANK = {
       return;
     }
 
-    state.stats.streak = 0;
-    state.current.hadWrongTry = true;
-    markMissed(state.current);
-    setFeedback("bad", rawTranscript ? `I heard "${rawTranscript.trim()}". Try again, use Hint, or press Reveal.` : "Not quite. Try again, use Hint, or press Reveal.");
-    celebration.notifyError();
-    renderStats();
+    startCopyPractice(rawTranscript);
   }
 
   function reviewMissed() {

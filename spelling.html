@@ -532,16 +532,16 @@ button.ghost {
       <button type="button" class="ghost" id="soundToggle" title="Toggle sound effects (currently off)">🔇 Sound</button>
     </section>
 
-    <section id="privateBankPanel" class="card private-bank-panel" hidden aria-label="Private word bank">
+    <section id="privateBankPanel" class="card private-bank-panel" hidden aria-label="Database list">
       <div class="meta-row">
-        <span class="badge">Private word bank</span>
+        <span class="badge">Database list</span>
       </div>
       <form class="answer-form" autocomplete="off">
-        <label class="sr-only" for="privateBankInput">Private word bank file</label>
+        <label class="sr-only" for="privateBankInput">Database list file</label>
         <input id="privateBankInput" type="file" accept=".js,.json,application/json,text/javascript,text/plain" />
         <button type="button" class="primary" id="clearPrivateBankBtn">Clear</button>
       </form>
-      <p id="privateBankStatus" class="private-bank-status">Choose private-word-bank.js to unlock practice on this browser.</p>
+      <p id="privateBankStatus" class="private-bank-status">Choose database-list.js to unlock practice on this browser.</p>
     </section>
 
     <section class="card" aria-live="polite">
@@ -598,7 +598,7 @@ button.ghost {
   </main>
 
   <script>
-// Protected PSB words are loaded from private-word-bank.js, which is intentionally
+// Protected PSB words are loaded from a local database list, which is intentionally
 // kept out of git so the wordlist is not accidentally published.
 window.WORD_BANK = {
   "3": {
@@ -951,7 +951,7 @@ window.WORD_BANK = {
     els.privateBankPanel.hidden = hasWords;
     els.privateBankStatus.textContent = hasWords
       ? `Loaded ${wordBankCount()} private words.`
-      : "Choose private-word-bank.js to unlock practice on this browser.";
+      : "Choose database-list.js to unlock practice on this browser.";
   }
 
   function uniqueEntries(entries) {
@@ -1346,7 +1346,7 @@ window.WORD_BANK = {
       const hasWords = hasWordBankWords();
       setFeedback("warn", hasWords
         ? "No missed words yet. Switching back to the full list."
-        : "Choose private-word-bank.js above to unlock practice.");
+        : "Choose database-list.js above to unlock practice.");
       refillDeck();
       renderWordList();
       renderStats();
@@ -1558,7 +1558,7 @@ window.WORD_BANK = {
       applyPrivateWordBank(parsePrivateWordBank(text), true);
       els.privateBankInput.value = "";
     } catch (error) {
-      els.privateBankStatus.textContent = "That file did not look like a private word bank.";
+      els.privateBankStatus.textContent = "That file did not look like a database list.";
       setFeedback("bad", error.message || "Could not load the selected word bank.");
     }
   });
@@ -1573,7 +1573,7 @@ window.WORD_BANK = {
     };
     resetForSelectionChange();
     updatePrivateBankPanel();
-    setFeedback("warn", "Private word bank cleared from this browser.");
+    setFeedback("warn", "Database list cleared from this browser.");
   });
 
   els.form.addEventListener("submit", checkAnswer);

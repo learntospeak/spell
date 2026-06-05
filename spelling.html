@@ -336,6 +336,27 @@ button.ghost {
   font-weight: 700;
 }
 
+.private-bank-panel {
+  margin: 14px 0;
+  padding: 16px;
+}
+
+.private-bank-panel[hidden] {
+  display: none;
+}
+
+.private-bank-panel .button-row {
+  margin-top: 12px;
+}
+
+.private-bank-status {
+  min-height: 24px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+  text-align: center;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -511,6 +532,18 @@ button.ghost {
       <button type="button" class="ghost" id="soundToggle" title="Toggle sound effects (currently off)">🔇 Sound</button>
     </section>
 
+    <section id="privateBankPanel" class="card private-bank-panel" hidden aria-label="Private word bank">
+      <div class="meta-row">
+        <span class="badge">Private word bank</span>
+      </div>
+      <form class="answer-form" autocomplete="off">
+        <label class="sr-only" for="privateBankInput">Private word bank file</label>
+        <input id="privateBankInput" type="file" accept=".js,.json,application/json,text/javascript,text/plain" />
+        <button type="button" class="primary" id="clearPrivateBankBtn">Clear</button>
+      </form>
+      <p id="privateBankStatus" class="private-bank-status">Choose private-word-bank.js to unlock practice on this browser.</p>
+    </section>
+
     <section class="card" aria-live="polite">
       <div class="meta-row">
         <span id="stageBadge" class="badge">Poppy Phase 3</span>
@@ -575,7 +608,6 @@ window.WORD_BANK = {
 };
 
 </script>
-  <script src="private-word-bank.js"></script>
   <script>
 (() => {
   "use strict";
@@ -713,6 +745,10 @@ window.WORD_BANK = {
     revealBtn: document.querySelector("#revealBtn"),
     missedBtn: document.querySelector("#missedBtn"),
     soundToggle: document.querySelector("#soundToggle"),
+    privateBankPanel: document.querySelector("#privateBankPanel"),
+    privateBankInput: document.querySelector("#privateBankInput"),
+    privateBankStatus: document.querySelector("#privateBankStatus"),
+    clearPrivateBankBtn: document.querySelector("#clearPrivateBankBtn"),
     correctCount: document.querySelector("#correctCount"),
     tryCount: document.querySelector("#tryCount"),
     streakCount: document.querySelector("#streakCount"),
@@ -739,6 +775,8 @@ window.WORD_BANK = {
     missing: "Fill the missing letters",
     mix: "Mix both games"
   };
+
+  const privateBankStorageKey = "spellingBee_privateWordBank";
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
   const letterWords = {
@@ -832,6 +870,88 @@ window.WORD_BANK = {
 
   function getStageData() {
     return window.WORD_BANK[els.stageSelect.value];
+  }
+
+  function hasWordBankWords() {
+    return Object.values(getStageData().levels).some((words) => Array.isArray(words) && words.length);
+  }
+
+  function wordBankCount() {
+    return Object.values(getStageData().levels)
+      .reduce((total, words) => total + (Array.isArray(words) ? words.length : 0), 0);
+  }
+
+  function validateWordBank(wordBank) {
+    if (!wordBank || !wordBank["3"] || !wordBank["3"].levels) {
+      throw new Error("Word bank must include Poppy Phase 3 levels.");
+    }
+
+    const levels = {};
+    Object.entries(wordBank["3"].levels).forEach(([level, words]) => {
+      if (!Array.isArray(words)) return;
+      const cleanWords = words
+        .map((word) => String(word || "").trim())
+        .filter(Boolean);
+      if (cleanWords.length) levels[level] = cleanWords;
+    });
+
+    if (!Object.keys(levels).length) {
+      throw new Error("No words found in the selected file.");
+    }
+
+    return {
+      "3": {
+        label: wordBank["3"].label || "Poppy Phase 3",
+        levels
+      }
+    };
+  }
+
+  function parsePrivateWordBank(text) {
+    const trimmed = String(text || "").trim();
+    if (!trimmed) throw new Error("Selected file is empty.");
+
+    if (trimmed.startsWith("{")) {
+      return validateWordBank(JSON.parse(trimmed));
+    }
+
+    const sandbox = {};
+    const result = Function("window", `${trimmed}\nreturn window.WORD_BANK;`)(sandbox);
+    return validateWordBank(result);
+  }
+
+  function applyPrivateWordBank(wordBank, shouldSave) {
+    window.WORD_BANK = validateWordBank(wordBank);
+    if (shouldSave) {
+      localStorage.setItem(privateBankStorageKey, JSON.stringify(window.WORD_BANK));
+    }
+    state.deck = [];
+    state.current = null;
+    state.useMissedOnly = false;
+    renderBadges();
+    renderModeControls();
+    renderWordList();
+    renderStats();
+    updatePrivateBankPanel();
+    setFeedback("good", `Loaded ${wordBankCount()} private words.`);
+  }
+
+  function loadSavedPrivateWordBank() {
+    const saved = localStorage.getItem(privateBankStorageKey);
+    if (!saved) return;
+    try {
+      window.WORD_BANK = validateWordBank(JSON.parse(saved));
+    } catch (error) {
+      localStorage.removeItem(privateBankStorageKey);
+    }
+  }
+
+  function updatePrivateBankPanel() {
+    const hasWords = hasWordBankWords();
+    els.privateBankPanel.hidden = hasWords;
+    els.privateBankStatus.textContent = hasWords
+      ? `Loaded ${wordBankCount()} private words.`
+      : "Choose private-word-bank.js to unlock practice on this browser.";
   }
 
   function uniqueEntries(entries) {
@@ -1223,10 +1343,10 @@ window.WORD_BANK = {
     const entries = selectedEntries();
     if (!entries.length) {
       state.useMissedOnly = false;
-      const hasWords = Object.values(getStageData().levels).some((words) => words.length);
+      const hasWords = hasWordBankWords();
       setFeedback("warn", hasWords
         ? "No missed words yet. Switching back to the full list."
-        : "Private word bank is missing. Keep private-word-bank.js beside this file.");
+        : "Choose private-word-bank.js above to unlock practice.");
       refillDeck();
       renderWordList();
       renderStats();
@@ -1429,6 +1549,33 @@ window.WORD_BANK = {
     els.soundToggle.title = "Turn sound off";
   }
 
+  els.privateBankInput.addEventListener("change", async () => {
+    const file = els.privateBankInput.files && els.privateBankInput.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      applyPrivateWordBank(parsePrivateWordBank(text), true);
+      els.privateBankInput.value = "";
+    } catch (error) {
+      els.privateBankStatus.textContent = "That file did not look like a private word bank.";
+      setFeedback("bad", error.message || "Could not load the selected word bank.");
+    }
+  });
+
+  els.clearPrivateBankBtn.addEventListener("click", () => {
+    localStorage.removeItem(privateBankStorageKey);
+    window.WORD_BANK = {
+      "3": {
+        label: "Poppy Phase 3",
+        levels: {}
+      }
+    };
+    resetForSelectionChange();
+    updatePrivateBankPanel();
+    setFeedback("warn", "Private word bank cleared from this browser.");
+  });
+
   els.form.addEventListener("submit", checkAnswer);
   els.newWordBtn.addEventListener("click", newWord);
   els.speakBtn.addEventListener("click", speakCurrent);
@@ -1455,11 +1602,13 @@ window.WORD_BANK = {
     });
   });
 
+  loadSavedPrivateWordBank();
   applyInitialParams();
   renderBadges();
   renderModeControls();
   renderWordList();
   renderStats();
+  updatePrivateBankPanel();
 })();
 
 </script>

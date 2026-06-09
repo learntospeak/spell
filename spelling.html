@@ -808,7 +808,7 @@ window.WORD_BANK = {
   };
 
   const privateBankStorageKey = "spellingBee_privateWordBank";
-  const dictionaryStorageKey = "spellingBee_dictionaryCache";
+  const dictionaryStorageKey = "spellingBee_dictionaryCache_v2";
   const protectedBankUrl = "database-list.enc.json";
   const protectedBankUsername = "poppy";
   const dictionaryCache = readDictionaryCache();
@@ -1265,8 +1265,211 @@ window.WORD_BANK = {
     speak(`Spell ${state.current.word}.`);
   }
 
-  function dictionaryFallbackSentence(word) {
-    return `Here is a sentence. The student carefully practised the word ${word} before the spelling challenge.`;
+  function stripHtml(value) {
+    const template = document.createElement("template");
+    template.innerHTML = String(value || "");
+    return (template.content.textContent || template.innerText || "")
+      .replace(/\.mw-parser-output.*$/i, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function cleanDefinition(value) {
+    return stripHtml(value)
+      .replace(/^a word used to describe\s+/i, "")
+      .replace(/^used to describe\s+/i, "")
+      .replace(/^plural of\s+/i, "more than one ")
+      .replace(/^alternative form of\s+/i, "another spelling of ")
+      .replace(/^synonym of\s+/i, "")
+      .replace(/\.$/, "")
+      .trim();
+  }
+
+  function isUsefulDefinition(value) {
+    const definition = cleanDefinition(value).toLocaleLowerCase();
+    if (!definition || definition.length < 8 || definition.length > 220) return false;
+    return ![
+      "obsolete",
+      "archaic",
+      "dated",
+      "misspelling",
+      "nonstandard",
+      "eye dialect",
+      "initialism",
+      "acronym"
+    ].some((term) => definition.includes(term));
+  }
+
+  function isCapitalisedWord(word) {
+    return /^[A-Z]/.test(String(word || ""));
+  }
+
+  function normalizeForExampleMatch(value) {
+    return String(value || "")
+      .toLocaleLowerCase()
+      .replace(/[^a-z]/g, "");
+  }
+
+  function exampleUsesWord(example, word) {
+    const exampleKey = normalizeForExampleMatch(example);
+    const wordKey = normalizeForExampleMatch(word);
+    return Boolean(wordKey && exampleKey.includes(wordKey));
+  }
+
+  function cleanExample(value, word) {
+    const example = stripHtml(value)
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!example || example.length > 180 || !exampleUsesWord(example, word)) return "";
+    return example.replace(/\.$/, ".");
+  }
+
+  function definitionScore(item, word) {
+    const definition = cleanDefinition(item.definition);
+    const lowerDefinition = definition.toLocaleLowerCase();
+    const lowerPart = String(item.partOfSpeech || "").toLocaleLowerCase();
+    const wordKey = normalizeForExampleMatch(word);
+    let score = 0;
+
+    if (isUsefulDefinition(definition)) score += 40;
+    if (cleanExample(item.example, word)) score += 12;
+    if (definition.length <= 120) score += 8;
+    if (lowerPart.includes("proper")) score += isCapitalisedWord(word) ? 55 : -25;
+    if (isCapitalisedWord(word) && !lowerPart.includes("proper")) score -= 35;
+    if (wordKey && normalizeForExampleMatch(definition).includes(wordKey)) score -= 22;
+    if (lowerDefinition.includes("synonym of")) score -= 18;
+    if (lowerDefinition.includes("a person who has")) score -= 25;
+    if (lowerDefinition.includes("surname")) score += isCapitalisedWord(word) ? 12 : -20;
+    if (lowerDefinition.includes("placename") || lowerDefinition.includes("place name")) score += isCapitalisedWord(word) ? 10 : 0;
+    return score;
+  }
+
+  function simplifyDefinitionForChild(word, definition, partOfSpeech) {
+    const lowerDefinition = definition.toLocaleLowerCase();
+    const lowerPart = String(partOfSpeech || "").toLocaleLowerCase();
+
+    if (lowerPart.includes("proper")) {
+      if (lowerDefinition.includes("surname")) {
+        return `${word} is a surname, which means a family name`;
+      }
+      if (lowerDefinition.includes("placename") || lowerDefinition.includes("place name")) {
+        return `${word} is a place name`;
+      }
+      if (/\b(mountains?|river|country|city|island|region|continent|ocean|sea)\b/i.test(definition)) {
+        return `${word} is a name for ${definition}`;
+      }
+      return `${word} is a proper name connected to ${definition}`;
+    }
+
+    return definition;
+  }
+
+  function chooseDefinitionItems(items, word) {
+    const usefulItems = items.filter((item) => isUsefulDefinition(item.definition));
+    const scoredItems = (usefulItems.length ? usefulItems : items.filter((item) => cleanDefinition(item.definition)))
+      .sort((a, b) => definitionScore(b, word) - definitionScore(a, word));
+    const picked = scoredItems[0] || null;
+    if (!picked) return {};
+
+    const meaning = cleanDefinition(picked.definition);
+    return {
+      meaning: simplifyDefinitionForChild(word, meaning, picked.partOfSpeech || ""),
+      sentence: "",
+      partOfSpeech: picked.partOfSpeech || ""
+    };
+  }
+
+  function dictionaryApiItems(entries) {
+    const items = [];
+    (Array.isArray(entries) ? entries : []).forEach((entry) => {
+      (entry.meanings || []).forEach((meaning) => {
+        (meaning.definitions || []).forEach((definition) => {
+          items.push({
+            partOfSpeech: meaning.partOfSpeech || "",
+            definition: definition.definition || "",
+            example: definition.example || ""
+          });
+        });
+      });
+    });
+    return items;
+  }
+
+  function wiktionaryItems(data) {
+    const items = [];
+    const englishEntries = Array.isArray(data && data.en) ? data.en : [];
+    englishEntries.forEach((entry) => {
+      (entry.definitions || []).forEach((definition) => {
+        const examples = Array.isArray(definition.parsedExamples)
+          ? definition.parsedExamples
+          : [];
+        items.push({
+          partOfSpeech: entry.partOfSpeech || "",
+          definition: definition.definition || "",
+          example: examples[0] && examples[0].example ? examples[0].example : ""
+        });
+      });
+    });
+    return items;
+  }
+
+  function sentenceTemplateIndex(word, count) {
+    const total = Array.from(word).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return total % count;
+  }
+
+  function shortMeaningPhrase(meaning) {
+    const phrase = cleanDefinition(meaning)
+      .replace(/^synonym of\s+/i, "")
+      .replace(/^to\s+/i, "")
+      .replace(/^(a|an|the)\s+/i, "")
+      .replace(/;.*$/, "")
+      .replace(/,\s*especially.*$/i, "")
+      .replace(/,\s*usually.*$/i, "")
+      .trim();
+
+    return phrase.charAt(0).toLocaleLowerCase() + phrase.slice(1);
+  }
+
+  function articleFor(word) {
+    return /^[aeiou]/i.test(String(word || "")) ? "an" : "a";
+  }
+
+  function generatedSentence(word, meaning, partOfSpeech) {
+    const phrase = shortMeaningPhrase(meaning);
+    if (!phrase) return "";
+
+    const lowerPart = String(partOfSpeech || "").toLocaleLowerCase();
+    const templates = lowerPart.includes("proper")
+      ? [
+          `${word} was the name Marley noticed in the story.`,
+          `In class, Marley learned about ${word}.`,
+          `The map or story mentioned ${word}.`,
+          `${word} appeared in the spelling list as an important name.`
+        ]
+      : lowerPart.includes("verb")
+      ? [
+          `In the story, the character tried to ${word}.`,
+          `During the activity, Mia had to ${word}.`,
+          `The coach used ${word} when explaining the next step.`,
+          `Marley wrote a sentence with ${word} during class.`
+        ]
+      : lowerPart.includes("adjective")
+        ? [
+          `The teacher used ${word} to describe something that was ${phrase}.`,
+          `Marley noticed the ${word} detail because it meant ${phrase}.`,
+            `In the story, the ${word} moment was connected to ${phrase}.`,
+            `The word ${word} helped describe something as ${phrase}.`
+          ]
+        : [
+            `The class talked about ${word} during the lesson.`,
+            `Marley wrote ${word} in her notebook after learning it means ${phrase}.`,
+            `Our project included the word ${word}.`,
+            `In the book, ${word} was connected to ${phrase}.`,
+            `The teacher explained ${word} in a simple way.`
+          ];
+
+    return templates[sentenceTemplateIndex(word, templates.length)];
   }
 
   async function fetchDictionaryContext(word) {
@@ -1274,31 +1477,26 @@ window.WORD_BANK = {
     if (!key) return {};
     if (dictionaryCache[key]) return dictionaryCache[key];
 
+    const items = [];
+
+    try {
+      const response = await fetch(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(word)}`);
+      if (response.ok) items.push(...wiktionaryItems(await response.json()));
+    } catch (error) {
+      // Try the next source.
+    }
+
     try {
       const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-      if (!response.ok) throw new Error("No dictionary entry found.");
-      const entries = await response.json();
-      const meanings = Array.isArray(entries) && entries[0] && Array.isArray(entries[0].meanings)
-        ? entries[0].meanings
-        : [];
-      const definitionItem = meanings
-        .flatMap((meaning) => Array.isArray(meaning.definitions) ? meaning.definitions : [])
-        .find((definition) => definition && definition.definition);
-      const exampleItem = meanings
-        .flatMap((meaning) => Array.isArray(meaning.definitions) ? meaning.definitions : [])
-        .find((definition) => definition && definition.example);
-      const context = {
-        meaning: definitionItem ? definitionItem.definition : "",
-        sentence: exampleItem ? exampleItem.example : ""
-      };
-      dictionaryCache[key] = context;
-      saveDictionaryCache();
-      return context;
+      if (response.ok) items.push(...dictionaryApiItems(await response.json()));
     } catch (error) {
-      dictionaryCache[key] = {};
-      saveDictionaryCache();
-      return {};
+      // Keep any Wiktionary results that were already found.
     }
+
+    const context = chooseDefinitionItems(items, word);
+    dictionaryCache[key] = context;
+    saveDictionaryCache();
+    return context;
   }
 
   async function getContextForCurrentWord() {
@@ -1309,7 +1507,8 @@ window.WORD_BANK = {
     const dictionaryContext = await fetchDictionaryContext(state.current.word);
     return {
       meaning: localContext.meaning || dictionaryContext.meaning || "",
-      sentence: localContext.sentence || dictionaryContext.sentence || ""
+      sentence: localContext.sentence || "",
+      partOfSpeech: dictionaryContext.partOfSpeech || ""
     };
   }
 
@@ -1322,9 +1521,14 @@ window.WORD_BANK = {
     els.sentenceBtn.disabled = true;
     try {
       const context = await getContextForCurrentWord();
-      const sentence = context.sentence || dictionaryFallbackSentence(state.current.word);
-      speak(sentence);
-      setFeedback("warn", "Listen for how the word is used in a sentence.");
+      const sentence = context.sentence || generatedSentence(state.current.word, context.meaning, context.partOfSpeech);
+      if (sentence) {
+        speak(sentence);
+        setFeedback("warn", "Listen for how the word is used in a sentence.");
+      } else {
+        speak(`I could not find a simple sentence for ${state.current.word} yet.`);
+        setFeedback("warn", "No simple sentence found for this word yet.");
+      }
     } finally {
       els.sentenceBtn.disabled = false;
       renderModeControls();
@@ -1341,11 +1545,11 @@ window.WORD_BANK = {
     try {
       const context = await getContextForCurrentWord();
       if (context.meaning) {
-        speak(`${state.current.word} means: ${context.meaning}`);
+        speak(`${state.current.word} means: ${cleanDefinition(context.meaning)}.`);
         setFeedback("warn", "Listen to the meaning, then try the spelling.");
       } else {
-        speak(`I could not find a dictionary meaning for ${state.current.word}. Try listening to the sentence instead.`);
-        setFeedback("warn", "No dictionary meaning found for this word yet.");
+        speak(`I could not find a simple dictionary meaning for ${state.current.word} yet.`);
+        setFeedback("warn", "No simple dictionary meaning found for this word yet.");
       }
     } finally {
       els.meaningBtn.disabled = false;

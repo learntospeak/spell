@@ -588,6 +588,8 @@ button.ghost {
       <div class="button-row">
         <button type="button" id="newWordBtn">New word</button>
         <button type="button" id="speakBtn">Say it again</button>
+        <button type="button" id="sentenceBtn">Use in a sentence</button>
+        <button type="button" id="meaningBtn">Hear meaning</button>
         <button type="button" id="listenBtn" hidden>Listen</button>
         <button type="button" id="hintBtn">Hint</button>
         <button type="button" id="revealBtn">Reveal</button>
@@ -764,6 +766,8 @@ window.WORD_BANK = {
     feedback: document.querySelector("#feedback"),
     newWordBtn: document.querySelector("#newWordBtn"),
     speakBtn: document.querySelector("#speakBtn"),
+    sentenceBtn: document.querySelector("#sentenceBtn"),
+    meaningBtn: document.querySelector("#meaningBtn"),
     listenBtn: document.querySelector("#listenBtn"),
     hintBtn: document.querySelector("#hintBtn"),
     revealBtn: document.querySelector("#revealBtn"),
@@ -804,8 +808,10 @@ window.WORD_BANK = {
   };
 
   const privateBankStorageKey = "spellingBee_privateWordBank";
+  const dictionaryStorageKey = "spellingBee_dictionaryCache";
   const protectedBankUrl = "database-list.enc.json";
   const protectedBankUsername = "poppy";
+  const dictionaryCache = readDictionaryCache();
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
   const letterWords = {
@@ -893,6 +899,31 @@ window.WORD_BANK = {
       .replace(/[\s._-]+/g, "");
   }
 
+  function readDictionaryCache() {
+    try {
+      return JSON.parse(localStorage.getItem(dictionaryStorageKey)) || {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function saveDictionaryCache() {
+    localStorage.setItem(dictionaryStorageKey, JSON.stringify(dictionaryCache));
+  }
+
+  function getWordText(entry) {
+    if (typeof entry === "string") return entry;
+    return String(entry && entry.word ? entry.word : "").trim();
+  }
+
+  function getWordContext(entry) {
+    if (!entry || typeof entry === "string") return {};
+    return {
+      sentence: String(entry.sentence || entry.example || "").trim(),
+      meaning: String(entry.meaning || entry.definition || "").trim()
+    };
+  }
+
   function displayLevel(level) {
     return level === "all" ? "All levels" : `Level ${level}`;
   }
@@ -919,7 +950,15 @@ window.WORD_BANK = {
     Object.entries(wordBank["3"].levels).forEach(([level, words]) => {
       if (!Array.isArray(words)) return;
       const cleanWords = words
-        .map((word) => String(word || "").trim())
+        .map((word) => {
+          if (typeof word === "string") return word.trim();
+          const wordText = getWordText(word);
+          if (!wordText) return "";
+          return {
+            ...word,
+            word: wordText
+          };
+        })
         .filter(Boolean);
       if (cleanWords.length) levels[level] = cleanWords;
     });
@@ -1042,7 +1081,13 @@ window.WORD_BANK = {
 
     Object.entries(stage.levels).forEach(([level, words]) => {
       if (selectedLevel !== "all" && selectedLevel !== level) return;
-      words.forEach((word) => entries.push({ stageId, stageLabel: stage.label, level, word }));
+      words.forEach((word) => entries.push({
+        stageId,
+        stageLabel: stage.label,
+        level,
+        word: getWordText(word),
+        context: getWordContext(word)
+      }));
     });
 
     const unique = uniqueEntries(entries);
@@ -1220,6 +1265,94 @@ window.WORD_BANK = {
     speak(`Spell ${state.current.word}.`);
   }
 
+  function dictionaryFallbackSentence(word) {
+    return `Here is a sentence. The student carefully practised the word ${word} before the spelling challenge.`;
+  }
+
+  async function fetchDictionaryContext(word) {
+    const key = normalize(word);
+    if (!key) return {};
+    if (dictionaryCache[key]) return dictionaryCache[key];
+
+    try {
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+      if (!response.ok) throw new Error("No dictionary entry found.");
+      const entries = await response.json();
+      const meanings = Array.isArray(entries) && entries[0] && Array.isArray(entries[0].meanings)
+        ? entries[0].meanings
+        : [];
+      const definitionItem = meanings
+        .flatMap((meaning) => Array.isArray(meaning.definitions) ? meaning.definitions : [])
+        .find((definition) => definition && definition.definition);
+      const exampleItem = meanings
+        .flatMap((meaning) => Array.isArray(meaning.definitions) ? meaning.definitions : [])
+        .find((definition) => definition && definition.example);
+      const context = {
+        meaning: definitionItem ? definitionItem.definition : "",
+        sentence: exampleItem ? exampleItem.example : ""
+      };
+      dictionaryCache[key] = context;
+      saveDictionaryCache();
+      return context;
+    } catch (error) {
+      dictionaryCache[key] = {};
+      saveDictionaryCache();
+      return {};
+    }
+  }
+
+  async function getContextForCurrentWord() {
+    if (!state.current) return {};
+    const localContext = state.current.context || {};
+    if (localContext.meaning && localContext.sentence) return localContext;
+
+    const dictionaryContext = await fetchDictionaryContext(state.current.word);
+    return {
+      meaning: localContext.meaning || dictionaryContext.meaning || "",
+      sentence: localContext.sentence || dictionaryContext.sentence || ""
+    };
+  }
+
+  async function speakCurrentSentence() {
+    if (!state.current) {
+      newWord();
+      return;
+    }
+
+    els.sentenceBtn.disabled = true;
+    try {
+      const context = await getContextForCurrentWord();
+      const sentence = context.sentence || dictionaryFallbackSentence(state.current.word);
+      speak(sentence);
+      setFeedback("warn", "Listen for how the word is used in a sentence.");
+    } finally {
+      els.sentenceBtn.disabled = false;
+      renderModeControls();
+    }
+  }
+
+  async function speakCurrentMeaning() {
+    if (!state.current) {
+      newWord();
+      return;
+    }
+
+    els.meaningBtn.disabled = true;
+    try {
+      const context = await getContextForCurrentWord();
+      if (context.meaning) {
+        speak(`${state.current.word} means: ${context.meaning}`);
+        setFeedback("warn", "Listen to the meaning, then try the spelling.");
+      } else {
+        speak(`I could not find a dictionary meaning for ${state.current.word}. Try listening to the sentence instead.`);
+        setFeedback("warn", "No dictionary meaning found for this word yet.");
+      }
+    } finally {
+      els.meaningBtn.disabled = false;
+      renderModeControls();
+    }
+  }
+
   function normalizeSpokenSpelling(text) {
     const cleaned = String(text || "")
       .toLocaleLowerCase()
@@ -1327,6 +1460,8 @@ window.WORD_BANK = {
     const isVoiceMode = state.current ? state.current.mode === "voice" : els.modeSelect.value === "voice";
     els.listenBtn.hidden = !isVoiceMode;
     els.newWordBtn.disabled = isCopyPractice;
+    els.sentenceBtn.disabled = isCopyPractice || !state.current;
+    els.meaningBtn.disabled = isCopyPractice || !state.current;
     els.hintBtn.disabled = isCopyPractice;
     els.revealBtn.disabled = isCopyPractice;
     els.stageSelect.disabled = isCopyPractice;
@@ -1657,6 +1792,8 @@ window.WORD_BANK = {
   els.form.addEventListener("submit", checkAnswer);
   els.newWordBtn.addEventListener("click", newWord);
   els.speakBtn.addEventListener("click", speakCurrent);
+  els.sentenceBtn.addEventListener("click", speakCurrentSentence);
+  els.meaningBtn.addEventListener("click", speakCurrentMeaning);
   els.listenBtn.addEventListener("click", startListening);
   els.revealBtn.addEventListener("click", reveal);
   els.hintBtn.addEventListener("click", giveHint);

@@ -11,6 +11,8 @@
   --maths: #176f87;
   --english: #8a4f17;
   --science: #2e7351;
+  --engineering: #6f4d13;
+  --finance: #5b6f1b;
   --spelling: #7357a8;
   --good: #0d7a4f;
   --bad: #b13d2b;
@@ -227,6 +229,14 @@ h2 {
   border-top: 5px solid var(--science);
 }
 
+.subject-card.engineering {
+  border-top: 5px solid var(--engineering);
+}
+
+.subject-card.finance {
+  border-top: 5px solid var(--finance);
+}
+
 .subject-card.spelling {
   border-top: 5px solid var(--spelling);
 }
@@ -312,6 +322,62 @@ h2 {
   grid-template-columns: 1fr auto;
   gap: 10px;
   margin-bottom: 12px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 13px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.45;
+}
+
+.work-area {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.fraction-grid {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 520px);
+  padding: 8px;
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.grid-cell {
+  aspect-ratio: 1;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0;
+  background: #fffdf8;
+}
+
+.grid-cell.selected {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75);
+}
+
+.grid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.feedback ul {
+  margin: 8px 0;
+  padding-left: 1.2rem;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .button-row {
@@ -465,6 +531,16 @@ body[data-subject="english"] {
 body[data-subject="science"] {
   --accent: var(--science);
   --accent-dark: #1f563b;
+}
+
+body[data-subject="engineering"] {
+  --accent: var(--engineering);
+  --accent-dark: #52380c;
+}
+
+body[data-subject="finance"] {
+  --accent: var(--finance);
+  --accent-dark: #3d4c10;
 }
 
 @media (max-width: 800px) {

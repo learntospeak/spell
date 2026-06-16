@@ -1,1491 +1,67 @@
 (() => {
   "use strict";
 
-  const activities = {
-    maths: [
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "choice",
-        prompt: "Which fraction is bigger?",
-        detail: "Think about how many equal parts are shaded.",
-        choices: ["1/2", "1/4", "They are the same", "1/8"],
-        answer: "1/2",
-        hint: "When the top number is the same, fewer bottom parts means bigger pieces."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "You buy a pencil for $1.20 and pay with $2.00. How much change?",
-        detail: "Write dollars and cents, or just cents.",
-        answer: ["$0.80", "80c", "80 cents", "0.80"],
-        hint: "Count up from $1.20 to $2.00."
-      },
-      {
-        stage: "2",
-        skill: "Times tables",
-        type: "text",
-        prompt: "6 x 7 = ?",
-        detail: "Use a known fact nearby if you need it.",
-        answer: ["42"],
-        hint: "6 x 5 is 30, then add two more sixes."
-      },
-      {
-        stage: "3",
-        skill: "Fractions",
-        type: "choice",
-        prompt: "Which is equivalent to 3/4?",
-        detail: "Equivalent means the same amount split into different sized pieces.",
-        choices: ["6/8", "4/6", "3/8", "9/16"],
-        answer: "6/8",
-        hint: "Multiply the top and bottom by the same number."
-      },
-      {
-        stage: "3",
-        skill: "Decimals",
-        type: "text",
-        prompt: "0.6 + 0.25 = ?",
-        detail: "Line up tenths and hundredths.",
-        answer: ["0.85", ".85"],
-        hint: "Write 0.6 as 0.60 first."
-      },
-      {
-        stage: "3",
-        skill: "Area",
-        type: "text",
-        prompt: "A rectangle is 8 cm long and 5 cm wide. What is its area?",
-        detail: "Area means the space inside the shape.",
-        answer: ["40", "40cm2", "40 cm2", "40 square cm", "40 square centimetres", "40 square centimeters"],
-        hint: "For a rectangle, multiply length by width."
-      }
-    ],
-    english: [
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence is punctuated correctly?",
-        detail: "Look for the capital letter and ending mark.",
-        choices: ["we went to the park.", "We went to the park.", "We went to the park", "we went to the park"],
-        answer: "We went to the park.",
-        hint: "A sentence starts with a capital and ends with punctuation."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "Which word is the strongest verb?",
-        detail: "The sentence is: The dog ___ across the yard.",
-        choices: ["went", "moved", "sprinted", "was"],
-        answer: "sprinted",
-        hint: "Choose the word that gives the clearest picture."
-      },
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Mia packed an umbrella because dark clouds covered the sky. Why did Mia pack it?",
-        detail: "Find the clue in the sentence.",
-        choices: ["She thought it might rain.", "She was going swimming.", "She wanted shade.", "She lost her umbrella."],
-        answer: "She thought it might rain.",
-        hint: "Dark clouds are usually a clue about weather."
-      },
-      {
-        stage: "3",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which sentence uses commas best?",
-        detail: "The list has three things.",
-        choices: ["I packed socks, lunch, and a torch.", "I packed socks lunch, and a torch.", "I packed, socks lunch and a torch.", "I packed socks lunch and, a torch."],
-        answer: "I packed socks, lunch, and a torch.",
-        hint: "Commas separate items in a list."
-      },
-      {
-        stage: "3",
-        skill: "Inference",
-        type: "choice",
-        prompt: "Tom stared at the trophy cabinet and tightened his shoelaces. What can you infer?",
-        detail: "Use clues, not just exact words.",
-        choices: ["He wants to do well in sport.", "He forgot his lunch.", "He is cleaning the cabinet.", "He is looking for a book."],
-        answer: "He wants to do well in sport.",
-        hint: "Trophy plus shoelaces points to sport or competition."
-      },
-      {
-        stage: "3",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which revision is clearest?",
-        detail: "Original: The storm was bad.",
-        choices: ["The storm smashed branches across the road.", "The storm was really very bad.", "The storm happened.", "The bad storm was bad."],
-        answer: "The storm smashed branches across the road.",
-        hint: "Specific details usually beat vague adjectives."
-      }
-    ],
-    science: [
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "Which material is best for keeping water in a cup?",
-        detail: "Think about properties, not colour.",
-        choices: ["Plastic", "Tissue paper", "Cotton wool", "Cardboard"],
-        answer: "Plastic",
-        hint: "The best choice does not soak up water."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "Which is evidence that something is living?",
-        detail: "Look for life processes.",
-        choices: ["It grows and needs food.", "It is shiny.", "It makes a loud sound.", "It is heavy."],
-        answer: "It grows and needs food.",
-        hint: "Living things need energy and change over time."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "A ball slows down as it rolls over carpet. What force is acting on it?",
-        detail: "The surface is rubbing against the ball.",
-        choices: ["Friction", "Gravity only", "Magnetism", "Evaporation"],
-        answer: "Friction",
-        hint: "Friction happens when surfaces rub together."
-      },
-      {
-        stage: "3",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "You test which soil grows beans best. What should stay the same?",
-        detail: "Only one thing should change in a fair test.",
-        choices: ["Amount of water and sunlight", "The type of soil", "The result", "The question"],
-        answer: "Amount of water and sunlight",
-        hint: "Keep everything the same except what you are testing."
-      },
-      {
-        stage: "3",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "Why do shadows change during the day?",
-        detail: "Think about the Sun's position in the sky.",
-        choices: ["The Sun appears to move across the sky.", "The object gets smaller.", "The ground turns.", "The shadow chooses a new direction."],
-        answer: "The Sun appears to move across the sky.",
-        hint: "A shadow points away from the light source."
-      },
-      {
-        stage: "3",
-        skill: "Energy",
-        type: "choice",
-        prompt: "Which change shows electrical energy becoming light energy?",
-        detail: "Follow the energy from source to result.",
-        choices: ["A lamp turning on", "Ice melting", "A paper plane falling", "A book sitting on a shelf"],
-        answer: "A lamp turning on",
-        hint: "Electricity enters the device, and light comes out."
-      }
-    ]
+  const funny = [
+    "a lunchbox committee with suspiciously strong opinions",
+    "Professor Pickle's extremely dramatic clipboard",
+    "a pancake-powered robot named Sir Flips-a-Lot",
+    "the neighbourhood sock inspector",
+    "a tiny mayor who only speaks in sticky notes",
+    "a skateboard club for confused calculators",
+    "a classroom shop run by a very serious banana",
+    "the Great Hallway Noodle Festival",
+    "a homework detective wearing magnificent gumboots",
+    "Captain Spreadsheet and the Budget Biscuits",
+    "a cafeteria courtroom where the ruler is the judge",
+    "the annual Under-Desk Treasure Audit",
+    "a glue-stick orchestra with terrible timing",
+    "the Midnight Library of Slightly Rude Bookmarks",
+    "a solar-powered scooter race around the sofa",
+    "the emergency meeting of the Lost Pencil Society",
+    "a cupcake factory with a suspiciously tiny conveyor belt",
+    "the school garden's dramatic watering roster",
+    "a paper-plane airport with strict snack security",
+    "the Museum of Almost Useful Inventions",
+    "a hat shop that only accepts exact change",
+    "the secret tunnel behind the whiteboard",
+    "a very competitive measuring tape championship",
+    "the Great Backpack Weight Investigation",
+    "a tiny theme park for bored paperclips",
+    "the canteen's legendary soup-launch disaster",
+    "a bridge-building contest for miniature lunch trays",
+    "the classroom weather station's dramatic forecast",
+    "a silent disco for calculators with low battery",
+    "the Friday Afternoon Mystery Graph"
+  ];
+
+  const names = ["Mia", "Leo", "Asha", "Noah", "Zara", "Finn", "Ruby", "Kai", "Evie", "Sam"];
+  const items = ["stickers", "marbles", "cupcakes", "pencils", "bookmarks", "shells", "trading cards", "magnets", "paper planes", "buttons"];
+
+  const skillsBySubject = {
+    maths: ["Number", "Fractions", "Measurement", "Data", "Problem solving"],
+    english: ["Comprehension", "Grammar", "Vocabulary", "Writing", "Persuasion"],
+    science: ["Living things", "Materials", "Forces", "Earth and space", "Investigations"],
+    engineering: ["Design brief", "Materials", "Forces", "Systems", "Testing"],
+    finance: ["Money maths", "Needs and wants", "Budgeting", "Saving", "Value choices"]
   };
 
-  const expandedActivities = {
-    maths: [
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: 18 + □ = 43",
-        detail: "Work backwards from 43 to 18.",
-        answer: ["25"],
-        hint: "43 - 18 tells you the missing number."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: □ - 17 = 28",
-        detail: "Think about what number becomes 28 after taking away 17.",
-        answer: ["45"],
-        hint: "Add 28 and 17."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: 6 x □ = 42",
-        detail: "Use a multiplication fact or work backwards.",
-        answer: ["7"],
-        hint: "Ask: 6 times what number makes 42?"
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: □ x 8 = 56",
-        detail: "Think of your 8 times table.",
-        answer: ["7"],
-        hint: "56 shared into groups of 8 gives the missing number."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: 63 / □ = 9",
-        detail: "Ask what number of equal groups makes 9 in each group.",
-        answer: ["7"],
-        hint: "9 x 7 = 63."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: 3 x □ + 4 = 25",
-        detail: "Undo the + 4 first, then divide by 3.",
-        answer: ["7"],
-        hint: "25 - 4 = 21, then 21 / 3."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: 5 x □ - 6 = 34",
-        detail: "Undo the - 6 first.",
-        answer: ["8"],
-        hint: "34 + 6 = 40, then 40 / 5."
-      },
-      {
-        stage: "2",
-        skill: "Equations",
-        type: "text",
-        prompt: "Find the missing number: □ / 4 = 9",
-        detail: "Think about the number before it was shared into 4 equal groups.",
-        answer: ["36"],
-        hint: "9 groups of 4 is 36."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "Marley has 24 stickers. She gives 7 to a friend, then gets 12 more. How many stickers does she have now?",
-        detail: "This is a two-step problem. Track the number after each change.",
-        answer: ["29"],
-        hint: "First do 24 - 7, then add 12."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "There are 6 bags with 8 marbles in each bag. Marley gives away 10 marbles. How many are left?",
-        detail: "Multiply first, then subtract.",
-        answer: ["38"],
-        hint: "6 x 8 = 48, then take away 10."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "A book has 96 pages. Marley reads 28 pages on Monday and 35 pages on Tuesday. How many pages are left?",
-        detail: "Find how many pages were read altogether first.",
-        answer: ["33"],
-        hint: "28 + 35 = 63. Then 96 - 63."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "Four tables each seat 6 students. Three more students sit on the floor. How many students are there altogether?",
-        detail: "Use multiplication and addition.",
-        answer: ["27"],
-        hint: "4 x 6, then add 3."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "A bus has 52 seats. 19 seats are empty. How many seats have people in them?",
-        detail: "Choose the operation that compares full and empty seats.",
-        answer: ["33"],
-        hint: "Subtract the empty seats from all the seats."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "Marley bakes 36 biscuits and shares them equally between 4 plates. She eats 2 biscuits from one plate. How many are left on that plate?",
-        detail: "Share first, then subtract.",
-        answer: ["7"],
-        hint: "36 / 4 = 9, then 9 - 2."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "A garden has 5 rows of 9 carrots. 14 carrots are picked. How many carrots remain?",
-        detail: "Find the total number of carrots first.",
-        answer: ["31"],
-        hint: "5 x 9 = 45, then subtract 14."
-      },
-      {
-        stage: "2",
-        skill: "Problem solving",
-        type: "text",
-        prompt: "Marley saves $3 each week for 7 weeks. Then she spends $8. How much money does she have left?",
-        detail: "Multiply the weekly saving first.",
-        answer: ["$13", "13", "13 dollars"],
-        hint: "3 x 7 = 21, then 21 - 8."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "text",
-        prompt: "What is 1/4 of 20?",
-        detail: "Split 20 into 4 equal groups.",
-        answer: ["5"],
-        hint: "20 / 4 = 5."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "text",
-        prompt: "What is 1/3 of 24?",
-        detail: "Share 24 into 3 equal groups.",
-        answer: ["8"],
-        hint: "3 groups of 8 make 24."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "text",
-        prompt: "What is 3/4 of 16?",
-        detail: "Find one quarter first, then take three quarters.",
-        answer: ["12"],
-        hint: "1/4 of 16 is 4, and 3 lots of 4 is 12."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "choice",
-        prompt: "Which is the largest fraction?",
-        detail: "The whole is the same size each time.",
-        choices: ["3/4", "1/4", "2/4", "1/2"],
-        answer: "3/4",
-        hint: "Fourths are equal pieces. Three fourths is more than one or two fourths."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "choice",
-        prompt: "Which fraction is equal to one half?",
-        detail: "Look for a fraction that names the same amount.",
-        choices: ["2/4", "1/3", "3/4", "2/3"],
-        answer: "2/4",
-        hint: "Two out of four equal parts is half the whole."
-      },
-      {
-        stage: "2",
-        skill: "Fractions",
-        type: "text",
-        prompt: "There are 30 counters. Marley colours 1/5 of them blue. How many counters are blue?",
-        detail: "Find one fifth of 30.",
-        answer: ["6"],
-        hint: "30 / 5 = 6."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "Marley buys a snack for $2.35 and a drink for $1.40. How much does she spend altogether?",
-        detail: "Add dollars and cents carefully.",
-        answer: ["$3.75", "3.75", "375c", "375 cents"],
-        hint: "$2.35 + $1.40 = $3.75."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "Marley has $10. She buys a book for $6.75. How much money is left?",
-        detail: "Count up from $6.75 to $10.00 or subtract.",
-        answer: ["$3.25", "3.25", "325c", "325 cents"],
-        hint: "$6.75 to $7.00 is 25c, then $3 more."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "Three pencils cost 65c each. What is the total cost?",
-        detail: "Add 65c three times or multiply.",
-        answer: ["$1.95", "1.95", "195c", "195 cents"],
-        hint: "65 + 65 + 65 = 195 cents."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "Marley buys two notebooks for $2.50 each. How much does she pay?",
-        detail: "Double the price of one notebook.",
-        answer: ["$5", "$5.00", "5", "5.00", "500c"],
-        hint: "$2.50 + $2.50 = $5.00."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "choice",
-        prompt: "Which coins make exactly $1.40?",
-        detail: "Add each set of coins.",
-        choices: ["$1 + 20c + 20c", "$1 + 50c", "50c + 50c + 50c", "$1 + 10c + 10c"],
-        answer: "$1 + 20c + 20c",
-        hint: "$1 plus 40c makes $1.40."
-      },
-      {
-        stage: "2",
-        skill: "Money",
-        type: "text",
-        prompt: "A toy costs $4.80. Marley has $3.25. How much more money does she need?",
-        detail: "Find the difference between the two amounts.",
-        answer: ["$1.55", "1.55", "155c", "155 cents"],
-        hint: "$3.25 to $4.80 is $1.55."
-      },
-      {
-        stage: "2",
-        skill: "Time",
-        type: "text",
-        prompt: "School starts at 9:00 am. Reading starts 45 minutes later. What time does reading start?",
-        detail: "Add 45 minutes to 9 o'clock.",
-        answer: ["9:45", "9:45 am", "9.45", "9.45 am"],
-        hint: "45 minutes after 9:00 is 9:45."
-      },
-      {
-        stage: "2",
-        skill: "Time",
-        type: "text",
-        prompt: "Marley starts homework at 4:20 pm and works for 35 minutes. What time does she finish?",
-        detail: "Add 35 minutes.",
-        answer: ["4:55", "4:55 pm", "4.55", "4.55 pm"],
-        hint: "20 minutes gets to 4:40, then 15 more gets to 4:55."
-      },
-      {
-        stage: "2",
-        skill: "Time",
-        type: "text",
-        prompt: "A movie starts at 2:15 pm and finishes at 3:40 pm. How long is the movie?",
-        detail: "Count from 2:15 to 3:40.",
-        answer: ["85 minutes", "85", "1 hour 25 minutes", "1 hr 25 min", "1h 25m"],
-        hint: "2:15 to 3:15 is 1 hour, then 25 more minutes."
-      },
-      {
-        stage: "2",
-        skill: "Time",
-        type: "choice",
-        prompt: "Which time is quarter to 6?",
-        detail: "Quarter to means 15 minutes before the hour.",
-        choices: ["5:45", "6:15", "6:45", "5:15"],
-        answer: "5:45",
-        hint: "15 minutes before 6:00 is 5:45."
-      },
-      {
-        stage: "2",
-        skill: "Measurement",
-        type: "text",
-        prompt: "A ribbon is 1 metre long. Marley cuts off 35 cm. How many centimetres are left?",
-        detail: "Remember that 1 metre is 100 centimetres.",
-        answer: ["65", "65cm", "65 cm", "65 centimetres", "65 centimeters"],
-        hint: "100 - 35 = 65."
-      },
-      {
-        stage: "2",
-        skill: "Measurement",
-        type: "text",
-        prompt: "A rectangle is 9 cm long and 4 cm wide. What is its perimeter?",
-        detail: "Perimeter is the distance around the outside.",
-        answer: ["26", "26cm", "26 cm", "26 centimetres", "26 centimeters"],
-        hint: "Add all sides: 9 + 4 + 9 + 4."
-      },
-      {
-        stage: "2",
-        skill: "Measurement",
-        type: "text",
-        prompt: "A square has sides of 7 cm. What is its perimeter?",
-        detail: "A square has four equal sides.",
-        answer: ["28", "28cm", "28 cm", "28 centimetres", "28 centimeters"],
-        hint: "7 + 7 + 7 + 7 = 28."
-      },
-      {
-        stage: "2",
-        skill: "Measurement",
-        type: "text",
-        prompt: "A fish tank holds 12 litres of water. Marley pours in 3 litres, then 4 litres, then 2 litres. How many more litres are needed to fill it?",
-        detail: "Add what has gone in, then compare with 12 litres.",
-        answer: ["3", "3l", "3 l", "3 litres", "3 liters"],
-        hint: "3 + 4 + 2 = 9. Then 12 - 9."
-      },
-      {
-        stage: "2",
-        skill: "Measurement",
-        type: "text",
-        prompt: "A rectangle has an area of 36 square cm. One side is 6 cm. What is the other side?",
-        detail: "Use the area fact backwards.",
-        answer: ["6", "6cm", "6 cm"],
-        hint: "6 times what number makes 36?"
-      },
-      {
-        stage: "2",
-        skill: "Patterns",
-        type: "text",
-        prompt: "What is the next number? 7, 14, 21, 28, □",
-        detail: "Find the rule before answering.",
-        answer: ["35"],
-        hint: "The pattern adds 7 each time."
-      },
-      {
-        stage: "2",
-        skill: "Patterns",
-        type: "text",
-        prompt: "What is the next number? 96, 88, 80, 72, □",
-        detail: "Look at how much the numbers change.",
-        answer: ["64"],
-        hint: "The pattern subtracts 8 each time."
-      },
-      {
-        stage: "2",
-        skill: "Patterns",
-        type: "text",
-        prompt: "What is the missing number? 3, 6, 12, 24, □",
-        detail: "The rule is not adding this time.",
-        answer: ["48"],
-        hint: "Each number doubles."
-      },
-      {
-        stage: "2",
-        skill: "Patterns",
-        type: "choice",
-        prompt: "Which rule matches this pattern? 5, 10, 20, 40",
-        detail: "Check the change from one number to the next.",
-        choices: ["Double each time", "Add 5 each time", "Subtract 10 each time", "Add 10 each time"],
-        answer: "Double each time",
-        hint: "10 is double 5, 20 is double 10, and 40 is double 20."
-      },
-      {
-        stage: "2",
-        skill: "Data",
-        type: "text",
-        prompt: "Marley records favourite fruits: apples 8, bananas 6, grapes 11, oranges 5. How many children chose fruit altogether?",
-        detail: "Add all the votes.",
-        answer: ["30"],
-        hint: "8 + 6 + 11 + 5."
-      },
-      {
-        stage: "2",
-        skill: "Data",
-        type: "text",
-        prompt: "A class survey shows 14 students walk to school and 9 students ride. How many more students walk than ride?",
-        detail: "Compare the two numbers.",
-        answer: ["5"],
-        hint: "14 - 9 = 5."
-      },
-      {
-        stage: "2",
-        skill: "Data",
-        type: "choice",
-        prompt: "A graph shows 12 votes for soccer, 7 for tennis, 9 for swimming, and 5 for netball. Which sport was most popular?",
-        detail: "Find the largest number of votes.",
-        choices: ["Soccer", "Tennis", "Swimming", "Netball"],
-        answer: "Soccer",
-        hint: "12 is the largest number in the data."
-      }
-    ],
-    english: [
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Read: Ella packed her library bag, checked the due-date slip, and hurried to school. What is Ella probably trying to do?",
-        detail: "Use all the clues in the sentence.",
-        choices: ["Return her books on time", "Buy a new school bag", "Go swimming", "Find her lunch"],
-        answer: "Return her books on time",
-        hint: "Library bag and due-date slip are the strongest clues."
-      },
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Read: The cake was still soft in the middle, so Dad put it back in the oven. Why did Dad do this?",
-        detail: "Think about cause and effect.",
-        choices: ["The cake needed more cooking", "The oven was broken", "The cake was too cold to eat", "Dad wanted to hide the cake"],
-        answer: "The cake needed more cooking",
-        hint: "Soft in the middle means it was not fully cooked."
-      },
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Read: Sam watered the plant every morning, but its leaves turned brown. What detail shows there is still a problem?",
-        detail: "Find the evidence in the sentence.",
-        choices: ["The leaves turned brown", "Sam watered it", "It was morning", "There was a plant"],
-        answer: "The leaves turned brown",
-        hint: "Brown leaves suggest the plant is not healthy."
-      },
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Read: First Asha measured the flour. Next she cracked two eggs. Finally she stirred the mixture. What was Asha probably making?",
-        detail: "Use the sequence of actions.",
-        choices: ["Something baked or cooked", "A paper kite", "A garden bed", "A new dress"],
-        answer: "Something baked or cooked",
-        hint: "Flour, eggs, and stirring usually belong in cooking."
-      },
-      {
-        stage: "2",
-        skill: "Comprehension",
-        type: "choice",
-        prompt: "Read: The sign said, 'Wet paint'. Noah kept his hands in his pockets as he walked past. Why?",
-        detail: "Use the sign and Noah's action.",
-        choices: ["He did not want paint on his hands", "He was cold", "He lost his gloves", "He was counting coins"],
-        answer: "He did not want paint on his hands",
-        hint: "The sign warns that touching the paint could make a mess."
-      },
-      {
-        stage: "2",
-        skill: "Inference",
-        type: "choice",
-        prompt: "Luca put his untouched sandwich back in his lunchbox and stared at the rain outside. What can you infer?",
-        detail: "Use clues from both parts of the sentence.",
-        choices: ["Luca may be sad or worried", "Luca is excited to play outside", "Luca forgot his lunchbox", "Luca is eating quickly"],
-        answer: "Luca may be sad or worried",
-        hint: "Untouched food and staring at rain are clues about mood."
-      },
-      {
-        stage: "2",
-        skill: "Inference",
-        type: "choice",
-        prompt: "Maya grinned when she saw the envelope with her name on it. She tore it open carefully. How is Maya probably feeling?",
-        detail: "Look at the action and expression.",
-        choices: ["Excited", "Bored", "Angry", "Sleepy"],
-        answer: "Excited",
-        hint: "A grin is a strong clue."
-      },
-      {
-        stage: "2",
-        skill: "Inference",
-        type: "choice",
-        prompt: "Ben's hands shook as he stepped onto the stage. What can you infer?",
-        detail: "Think about how his body shows feelings.",
-        choices: ["He might be nervous", "He is going to sleep", "He is swimming", "He forgot how to walk"],
-        answer: "He might be nervous",
-        hint: "Shaking hands can be a clue for nerves."
-      },
-      {
-        stage: "2",
-        skill: "Inference",
-        type: "choice",
-        prompt: "The class fell silent when the principal walked in holding a certificate. What might happen next?",
-        detail: "Predict using the clue.",
-        choices: ["Someone may receive an award", "Everyone will go home", "The room will flood", "The certificate will be eaten"],
-        answer: "Someone may receive an award",
-        hint: "Certificates are often given as awards."
-      },
-      {
-        stage: "2",
-        skill: "Inference",
-        type: "choice",
-        prompt: "Nina zipped her jacket, pulled on boots, and picked up an umbrella. What is the weather probably like?",
-        detail: "Use the clothing and object clues.",
-        choices: ["Cold and rainy", "Hot and dry", "Windless and sunny", "Snowing inside"],
-        answer: "Cold and rainy",
-        hint: "Jacket, boots, and umbrella point to wet or cold weather."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which word is the verb in this sentence? The puppy chased the red ball.",
-        detail: "The verb is the action.",
-        choices: ["chased", "puppy", "red", "ball"],
-        answer: "chased",
-        hint: "Ask what the puppy did."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which word is the adjective? The tiny frog jumped into the pond.",
-        detail: "An adjective describes a noun.",
-        choices: ["tiny", "jumped", "pond", "into"],
-        answer: "tiny",
-        hint: "Tiny describes the frog."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which sentence uses past tense correctly?",
-        detail: "Past tense tells what already happened.",
-        choices: ["Yesterday we played soccer.", "Yesterday we play soccer.", "Yesterday we playing soccer.", "Yesterday we plays soccer."],
-        answer: "Yesterday we played soccer.",
-        hint: "Played shows the action already happened."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Choose the best conjunction: Marley wanted to play outside, ___ it was raining.",
-        detail: "Pick the joining word that shows a problem.",
-        choices: ["but", "and", "because", "so"],
-        answer: "but",
-        hint: "But shows the second idea is different or surprising."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which sentence has subject-verb agreement?",
-        detail: "The subject and verb need to match.",
-        choices: ["The dogs run quickly.", "The dogs runs quickly.", "The dog run quickly.", "The dogs running quickly."],
-        answer: "The dogs run quickly.",
-        hint: "Dogs is plural, so use run."
-      },
-      {
-        stage: "2",
-        skill: "Grammar",
-        type: "choice",
-        prompt: "Which word is an adverb? The turtle moved slowly across the path.",
-        detail: "An adverb can describe how an action happens.",
-        choices: ["slowly", "turtle", "path", "across"],
-        answer: "slowly",
-        hint: "Slowly tells how the turtle moved."
-      },
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence has the comma in the right place?",
-        detail: "The sentence has a list.",
-        choices: ["I packed a hat, lunch, and water.", "I packed, a hat lunch and water.", "I packed a hat lunch, and water.", "I packed a hat lunch and, water."],
-        answer: "I packed a hat, lunch, and water.",
-        hint: "Commas separate items in a list."
-      },
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence needs a question mark?",
-        detail: "A question asks something.",
-        choices: ["Where did you put the ruler", "I found the ruler", "The ruler is blue", "Please pass the ruler"],
-        answer: "Where did you put the ruler",
-        hint: "Where begins a question."
-      },
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence is punctuated correctly?",
-        detail: "Look for capitals, apostrophe, and ending mark.",
-        choices: ["Marley's bag is under the desk.", "marley's bag is under the desk.", "Marleys bag is under the desk", "Marley's bag is under the desk"],
-        answer: "Marley's bag is under the desk.",
-        hint: "A name needs a capital, ownership needs an apostrophe, and the sentence needs a full stop."
-      },
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence uses speech marks correctly?",
-        detail: "Speech marks go around the words someone says.",
-        choices: ["\"Come here,\" said Mum.", "Come here, said \"Mum.\"", "\"Come here, said Mum.", "Come here,\" said Mum."],
-        answer: "\"Come here,\" said Mum.",
-        hint: "Only the spoken words go inside the speech marks."
-      },
-      {
-        stage: "2",
-        skill: "Punctuation",
-        type: "choice",
-        prompt: "Which sentence shows excitement?",
-        detail: "Choose the best ending punctuation.",
-        choices: ["We won the game!", "We won the game?", "We won the game,", "we won the game."],
-        answer: "We won the game!",
-        hint: "An exclamation mark can show excitement."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "Choose the strongest verb: The horse ___ across the paddock.",
-        detail: "Pick the word that creates the clearest picture.",
-        choices: ["galloped", "went", "did", "was"],
-        answer: "galloped",
-        hint: "Galloped is a precise action for a horse."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "Which word means almost the same as enormous?",
-        detail: "Look for a synonym.",
-        choices: ["huge", "tiny", "quiet", "smooth"],
-        answer: "huge",
-        hint: "Enormous means very big."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "Which word is the opposite of ancient?",
-        detail: "Look for an antonym.",
-        choices: ["modern", "old", "dusty", "broken"],
-        answer: "modern",
-        hint: "Ancient means very old."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "Choose the most precise word: The soup was too ___ to eat.",
-        detail: "Pick the adjective that fits soup.",
-        choices: ["salty", "square", "loud", "empty"],
-        answer: "salty",
-        hint: "Salty describes taste."
-      },
-      {
-        stage: "2",
-        skill: "Vocabulary",
-        type: "choice",
-        prompt: "What does inspect mean in this sentence? The scientist inspected the shell closely.",
-        detail: "Use the sentence clue closely.",
-        choices: ["looked at carefully", "threw away", "painted quickly", "forgot about"],
-        answer: "looked at carefully",
-        hint: "Closely tells you the scientist looked carefully."
-      },
-      {
-        stage: "2",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which revision is clearest? Original: The dog was nice.",
-        detail: "Choose the sentence with specific detail.",
-        choices: ["The dog wagged its tail and rested its head on my knee.", "The dog was very very nice.", "The dog was a dog.", "Nice was the dog."],
-        answer: "The dog wagged its tail and rested its head on my knee.",
-        hint: "Specific actions help the reader picture the dog."
-      },
-      {
-        stage: "2",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which sentence removes the repeated word? The girl ran fast because she was fast.",
-        detail: "Keep the meaning but improve the wording.",
-        choices: ["The girl sprinted because she was quick.", "The girl ran fast because fast.", "The fast girl was fast and ran fast.", "The girl was girl fast."],
-        answer: "The girl sprinted because she was quick.",
-        hint: "Sprinted replaces ran fast."
-      },
-      {
-        stage: "2",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which sentence has the best word order?",
-        detail: "Choose the sentence that sounds natural.",
-        choices: ["I carefully placed the glass on the table.", "Carefully the on table glass I placed.", "The table placed I carefully glass.", "Glass carefully table on I placed."],
-        answer: "I carefully placed the glass on the table.",
-        hint: "A clear sentence usually names who did what, then where."
-      },
-      {
-        stage: "2",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which sentence combines the ideas best? The sun came out. The puddles dried.",
-        detail: "Use a joining word that explains why.",
-        choices: ["The puddles dried because the sun came out.", "The sun came out but the puddles dried.", "The puddles dried or the sun came out.", "The sun dried puddles because out."],
-        answer: "The puddles dried because the sun came out.",
-        hint: "Because shows the reason."
-      },
-      {
-        stage: "2",
-        skill: "Editing",
-        type: "choice",
-        prompt: "Which sentence is best for a story opening?",
-        detail: "Pick the one that makes the reader curious.",
-        choices: ["A strange tapping sound came from inside the old cupboard.", "I woke up and it was a day.", "There was a thing somewhere.", "The story started."],
-        answer: "A strange tapping sound came from inside the old cupboard.",
-        hint: "A specific sound and place create mystery."
-      },
-      {
-        stage: "2",
-        skill: "Main idea",
-        type: "choice",
-        prompt: "Read: Bees visit flowers to collect nectar. As they move, pollen sticks to their bodies and travels to other flowers. What is the main idea?",
-        detail: "Choose what the whole text is mostly about.",
-        choices: ["Bees help move pollen between flowers", "Bees only like yellow flowers", "Nectar is always sticky", "Flowers can fly"],
-        answer: "Bees help move pollen between flowers",
-        hint: "Both sentences are about bees moving between flowers."
-      },
-      {
-        stage: "2",
-        skill: "Main idea",
-        type: "choice",
-        prompt: "Read: Helmets protect your head. Knee pads protect your knees. Bright clothes help drivers see you. What is the main idea?",
-        detail: "Think about what all details have in common.",
-        choices: ["Ways to stay safe while riding", "How to win a bike race", "Why bikes have wheels", "Different colours of clothes"],
-        answer: "Ways to stay safe while riding",
-        hint: "Each detail is about safety."
-      },
-      {
-        stage: "2",
-        skill: "Main idea",
-        type: "choice",
-        prompt: "Read: Some animals sleep during the day and hunt at night. Owls, bats, and possums are examples. What is the main idea?",
-        detail: "Find the idea that covers every sentence.",
-        choices: ["Some animals are active at night", "All animals sleep at night", "Owls cannot see", "Possums are plants"],
-        answer: "Some animals are active at night",
-        hint: "The examples all connect to being active at night."
-      },
-      {
-        stage: "2",
-        skill: "Sequence",
-        type: "choice",
-        prompt: "Which event should come first when planting a seed?",
-        detail: "Think about the order of steps.",
-        choices: ["Put soil in the pot", "Pick the ripe fruit", "Measure the tall plant", "Collect seeds from the flower"],
-        answer: "Put soil in the pot",
-        hint: "You need soil before the seed can be planted."
-      },
-      {
-        stage: "2",
-        skill: "Sequence",
-        type: "choice",
-        prompt: "Read: First, Tom mixed the batter. Next, he poured it into a pan. What probably happens after that?",
-        detail: "Use the cooking sequence.",
-        choices: ["He puts the pan in the oven", "He packs his school bag", "He washes the car", "He plants the pan"],
-        answer: "He puts the pan in the oven",
-        hint: "Batter in a pan is usually ready to bake."
-      },
-      {
-        stage: "2",
-        skill: "Sequence",
-        type: "choice",
-        prompt: "Which word best shows that something happened after another event?",
-        detail: "Look for a time-order word.",
-        choices: ["finally", "under", "blue", "quiet"],
-        answer: "finally",
-        hint: "Finally tells about the last step."
-      },
-      {
-        stage: "2",
-        skill: "Text features",
-        type: "choice",
-        prompt: "Where would you look to quickly find the page about frogs in an information book?",
-        detail: "Think about book features.",
-        choices: ["Index", "Front cover picture", "Barcode", "Spine colour"],
-        answer: "Index",
-        hint: "An index lists topics and page numbers."
-      },
-      {
-        stage: "2",
-        skill: "Text features",
-        type: "choice",
-        prompt: "What is the purpose of a caption under a photo?",
-        detail: "Think about how captions help readers.",
-        choices: ["It explains the photo", "It hides the photo", "It replaces the title", "It tells the price of the book"],
-        answer: "It explains the photo",
-        hint: "A caption gives information about an image."
-      },
-      {
-        stage: "2",
-        skill: "Text features",
-        type: "choice",
-        prompt: "What does a heading usually tell you?",
-        detail: "Use what you know about information texts.",
-        choices: ["What the section is about", "The author's home address", "The book's weight", "Where to put the book"],
-        answer: "What the section is about",
-        hint: "Headings introduce topics or sections."
-      },
-      {
-        stage: "2",
-        skill: "Writing purpose",
-        type: "choice",
-        prompt: "Which sentence belongs in a persuasive text about school gardens?",
-        detail: "Persuasive writing tries to convince the reader.",
-        choices: ["Every school should have a garden because students can learn outside.", "The garden has six tomato plants.", "I watered the garden on Tuesday.", "The shovel is beside the shed."],
-        answer: "Every school should have a garden because students can learn outside.",
-        hint: "Should and because help make an argument."
-      },
-      {
-        stage: "2",
-        skill: "Writing purpose",
-        type: "choice",
-        prompt: "Which sentence sounds most like an information report?",
-        detail: "Information reports give facts.",
-        choices: ["Penguins are birds that cannot fly.", "Please buy me a penguin.", "I had the best penguin dream ever!", "The penguin whispered a secret."],
-        answer: "Penguins are birds that cannot fly.",
-        hint: "It gives a factual statement about penguins."
-      },
-      {
-        stage: "2",
-        skill: "Writing purpose",
-        type: "choice",
-        prompt: "Which opening best suits a recount?",
-        detail: "A recount tells what happened.",
-        choices: ["On Saturday, my family visited the museum.", "Dinosaurs lived millions of years ago.", "You must visit the museum today.", "How to make a paper plane."],
-        answer: "On Saturday, my family visited the museum.",
-        hint: "It tells when and what happened to the writer."
-      },
-      {
-        stage: "2",
-        skill: "Writing purpose",
-        type: "choice",
-        prompt: "Which sentence best belongs in an imaginative story?",
-        detail: "Imaginative writing often creates a character, setting, or problem.",
-        choices: ["The tiny door in the tree opened with a golden flash.", "Dogs are mammals with sharp hearing.", "First, fold the paper in half.", "Every student should wear a hat outside."],
-        answer: "The tiny door in the tree opened with a golden flash.",
-        hint: "It creates a story moment that makes the reader wonder what happens next."
-      }
-    ],
-    science: [
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "Marley needs to make a raincoat for a toy. Which material would work best?",
-        detail: "Think about water resistance.",
-        choices: ["Plastic sheet", "Tissue", "Cotton wool", "Paper towel"],
-        answer: "Plastic sheet",
-        hint: "A raincoat needs a material that does not soak up water easily."
-      },
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "Which property makes glass useful for windows?",
-        detail: "Think about what windows need to do.",
-        choices: ["It is transparent", "It is fluffy", "It absorbs water", "It bends like rubber"],
-        answer: "It is transparent",
-        hint: "Transparent materials let light pass through."
-      },
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "A spoon for hot soup should not burn your hand. Which material is best for the handle?",
-        detail: "Think about heat transfer.",
-        choices: ["Wood", "Metal", "Ice", "Thin foil"],
-        answer: "Wood",
-        hint: "Wood does not let heat travel through it as quickly as metal."
-      },
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "Which object is most likely magnetic?",
-        detail: "Magnets attract some metals, especially iron and steel.",
-        choices: ["Steel paperclip", "Wooden ruler", "Plastic cup", "Rubber eraser"],
-        answer: "Steel paperclip",
-        hint: "Steel contains iron."
-      },
-      {
-        stage: "2",
-        skill: "Materials",
-        type: "choice",
-        prompt: "Why is rubber useful for shoe soles?",
-        detail: "Think about grip and flexibility.",
-        choices: ["It grips surfaces and bends", "It dissolves in water", "It shatters easily", "It is always transparent"],
-        answer: "It grips surfaces and bends",
-        hint: "Shoe soles need grip and some flexibility."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "Which list has only things a plant needs to grow well?",
-        detail: "Think about plant needs.",
-        choices: ["Water, light, air, and nutrients", "Paint, sand, music, and glue", "Rocks, plastic, sugar, and oil", "Darkness, no water, and no air"],
-        answer: "Water, light, air, and nutrients",
-        hint: "Plants need light, water, air, and nutrients."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "A seed sprouts, grows leaves, flowers, and makes new seeds. What is this called?",
-        detail: "Think about the stages of a plant's life.",
-        choices: ["Life cycle", "Weather forecast", "Magnetic force", "Evaporation"],
-        answer: "Life cycle",
-        hint: "A life cycle is the repeating stages of a living thing."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "Which feature helps a fish live in water?",
-        detail: "Think about body parts and habitats.",
-        choices: ["Gills", "Feathers", "Fur", "Tree roots"],
-        answer: "Gills",
-        hint: "Gills help fish get oxygen from water."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "Why do birds build nests?",
-        detail: "Think about survival and young animals.",
-        choices: ["To protect eggs and chicks", "To make rain", "To grow leaves", "To store electricity"],
-        answer: "To protect eggs and chicks",
-        hint: "Nests are safe places for eggs and young birds."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "Which animal is most likely a herbivore?",
-        detail: "A herbivore eats plants.",
-        choices: ["Kangaroo eating grass", "Shark eating fish", "Spider eating insects", "Owl eating mice"],
-        answer: "Kangaroo eating grass",
-        hint: "Grass is a plant."
-      },
-      {
-        stage: "2",
-        skill: "Living things",
-        type: "choice",
-        prompt: "What might happen if a plant gets no sunlight for many days?",
-        detail: "Think about how plants make food.",
-        choices: ["It may become weak or die", "It will turn into a rock", "It will grow metal leaves", "It will need no water"],
-        answer: "It may become weak or die",
-        hint: "Plants need light to make food."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "Marley pushes a toy car harder. What will probably happen?",
-        detail: "Think about push strength.",
-        choices: ["The car will move faster or farther", "The car will become invisible", "The car will melt", "Gravity will stop existing"],
-        answer: "The car will move faster or farther",
-        hint: "A stronger push can change motion more."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "Why does a bike slow down when the brakes are squeezed?",
-        detail: "The brake pads rub against the wheel.",
-        choices: ["Friction slows the wheel", "Light pushes the bike", "The air becomes water", "The bike loses its shadow"],
-        answer: "Friction slows the wheel",
-        hint: "Friction is a force from rubbing surfaces."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "Which action is a pull?",
-        detail: "A pull moves something toward you.",
-        choices: ["Opening a drawer", "Pressing a button", "Kicking a ball", "Pushing a trolley"],
-        answer: "Opening a drawer",
-        hint: "You pull a drawer toward you to open it."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "A magnet picks up one object but not another. What should Marley test?",
-        detail: "Think about the object's material.",
-        choices: ["What material each object is made from", "The colour of the table", "The day of the week", "The sound of the magnet"],
-        answer: "What material each object is made from",
-        hint: "Magnets attract some materials and not others."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "What force pulls a dropped pencil toward the floor?",
-        detail: "Think about the force from Earth.",
-        choices: ["Gravity", "Friction", "Magnetism", "Evaporation"],
-        answer: "Gravity",
-        hint: "Gravity pulls objects toward Earth."
-      },
-      {
-        stage: "2",
-        skill: "Forces",
-        type: "choice",
-        prompt: "Which surface would probably let a toy car travel farthest?",
-        detail: "Less friction usually lets objects move farther.",
-        choices: ["Smooth tile", "Thick carpet", "Sand", "Grass"],
-        answer: "Smooth tile",
-        hint: "Smooth surfaces usually have less friction than rough surfaces."
-      },
-      {
-        stage: "2",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "Marley tests which paper towel absorbs the most water. What should she change?",
-        detail: "In a fair test, change one thing.",
-        choices: ["The brand of paper towel", "The amount of water each time", "The size of each piece", "The way she measures"],
-        answer: "The brand of paper towel",
-        hint: "The brand is the thing being tested."
-      },
-      {
-        stage: "2",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "Marley tests which ramp makes a car travel farther. What should stay the same?",
-        detail: "Only the ramp surface should change.",
-        choices: ["The toy car", "The question", "The result", "The colour of Marley's shoes"],
-        answer: "The toy car",
-        hint: "Use the same car so the test is fair."
-      },
-      {
-        stage: "2",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "Why should Marley repeat an experiment three times?",
-        detail: "Think about trustworthy results.",
-        choices: ["To check the results are reliable", "To make the table messy", "To change every variable", "To avoid measuring"],
-        answer: "To check the results are reliable",
-        hint: "Repeating helps you see if the same thing happens again."
-      },
-      {
-        stage: "2",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "Which measurement would help compare plant growth?",
-        detail: "Choose data that can be measured.",
-        choices: ["Height in centimetres", "How pretty the plant looks", "The plant's favourite song", "The name of the pot"],
-        answer: "Height in centimetres",
-        hint: "Centimetres give a clear measurement."
-      },
-      {
-        stage: "2",
-        skill: "Fair testing",
-        type: "choice",
-        prompt: "Marley asks, 'Which cup keeps water warm longest?' What should she measure?",
-        detail: "Choose the evidence that answers the question.",
-        choices: ["Water temperature over time", "The colour of the cup only", "The sound of the cup", "The shape of the table"],
-        answer: "Water temperature over time",
-        hint: "Temperature shows how warm the water is."
-      },
-      {
-        stage: "2",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "Why is it bright during the day?",
-        detail: "Think about Earth's main natural light source.",
-        choices: ["The Sun lights the part of Earth we are on", "The Moon makes all daylight", "Clouds shine like lamps", "Stars move into the classroom"],
-        answer: "The Sun lights the part of Earth we are on",
-        hint: "Daylight comes from the Sun."
-      },
-      {
-        stage: "2",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "When will a shadow usually be shortest?",
-        detail: "Think about the Sun being high or low.",
-        choices: ["Around midday", "At sunset", "At night", "Before sunrise"],
-        answer: "Around midday",
-        hint: "When the Sun is high, shadows are shorter."
-      },
-      {
-        stage: "2",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "What causes day and night?",
-        detail: "Think about Earth moving.",
-        choices: ["Earth spins on its axis", "The Sun turns off", "The Moon blocks every country", "Clouds cover the whole planet"],
-        answer: "Earth spins on its axis",
-        hint: "As Earth spins, different places face the Sun."
-      },
-      {
-        stage: "2",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "Why does the Moon seem to change shape?",
-        detail: "Think about how much of the lit side we can see.",
-        choices: ["We see different amounts of the lit half", "The Moon melts each week", "The Moon is a different object each night", "Stars cover parts of it"],
-        answer: "We see different amounts of the lit half",
-        hint: "The Moon's phases depend on how much of its lit side is visible from Earth."
-      },
-      {
-        stage: "2",
-        skill: "Earth and space",
-        type: "choice",
-        prompt: "Which object is a natural source of light?",
-        detail: "Natural means it is not made by people.",
-        choices: ["The Sun", "A torch", "A classroom lamp", "A phone screen"],
-        answer: "The Sun",
-        hint: "The Sun gives its own light naturally."
-      },
-      {
-        stage: "2",
-        skill: "Energy",
-        type: "choice",
-        prompt: "Which object changes electrical energy into sound energy?",
-        detail: "Think about what energy goes in and what comes out.",
-        choices: ["Speaker", "Book", "Spoon", "Pencil"],
-        answer: "Speaker",
-        hint: "A speaker uses electricity to make sound."
-      },
-      {
-        stage: "2",
-        skill: "Energy",
-        type: "choice",
-        prompt: "A toaster changes electrical energy mostly into what useful energy?",
-        detail: "Think about what cooks the bread.",
-        choices: ["Heat energy", "Magnetic energy", "Light only", "Sound only"],
-        answer: "Heat energy",
-        hint: "Toast cooks because the toaster gets hot."
-      },
-      {
-        stage: "2",
-        skill: "Energy",
-        type: "choice",
-        prompt: "Which item stores chemical energy that your body can use?",
-        detail: "Think about food as fuel.",
-        choices: ["Apple", "Rock", "Empty cup", "Metal key"],
-        answer: "Apple",
-        hint: "Food stores energy for living things."
-      },
-      {
-        stage: "2",
-        skill: "Energy",
-        type: "choice",
-        prompt: "Why does Marley wear a hat in strong sunlight?",
-        detail: "Think about light and heat from the Sun.",
-        choices: ["To reduce light and heat reaching her head", "To make the Sun colder", "To stop gravity", "To turn sunlight into water"],
-        answer: "To reduce light and heat reaching her head",
-        hint: "A hat gives shade."
-      },
-      {
-        stage: "2",
-        skill: "Energy",
-        type: "choice",
-        prompt: "Which object changes stored chemical energy into movement?",
-        detail: "Think about things that use fuel.",
-        choices: ["A petrol car driving", "A rock sitting still", "A window letting light in", "A cup on a shelf"],
-        answer: "A petrol car driving",
-        hint: "Fuel stores chemical energy that can be changed into motion."
-      },
-      {
-        stage: "2",
-        skill: "States of matter",
-        type: "choice",
-        prompt: "What happens to ice when it is heated enough?",
-        detail: "Think about changing state.",
-        choices: ["It melts into liquid water", "It becomes wood", "It disappears forever", "It turns into metal"],
-        answer: "It melts into liquid water",
-        hint: "Melting changes a solid into a liquid."
-      },
-      {
-        stage: "2",
-        skill: "States of matter",
-        type: "choice",
-        prompt: "Water left in a shallow dish slowly disappears on a warm day. What is happening?",
-        detail: "The liquid changes into a gas.",
-        choices: ["Evaporation", "Freezing", "Magnetism", "Friction"],
-        answer: "Evaporation",
-        hint: "Evaporation is liquid water changing into water vapour."
-      },
-      {
-        stage: "2",
-        skill: "States of matter",
-        type: "choice",
-        prompt: "Which one is a gas at room temperature?",
-        detail: "A gas spreads out to fill space.",
-        choices: ["Air", "Ice", "Milk", "Sand"],
-        answer: "Air",
-        hint: "Air is a mixture of gases."
-      },
-      {
-        stage: "2",
-        skill: "States of matter",
-        type: "choice",
-        prompt: "What change happens when water vapour cools on a cold window?",
-        detail: "Gas changes back into liquid drops.",
-        choices: ["Condensation", "Melting", "Burning", "Stretching"],
-        answer: "Condensation",
-        hint: "Condensation forms liquid water droplets."
-      },
-      {
-        stage: "2",
-        skill: "Weather",
-        type: "choice",
-        prompt: "Dark clouds, strong wind, and falling temperature may suggest what weather is coming?",
-        detail: "Use the weather clues.",
-        choices: ["A storm or rain", "A heatwave for sure", "No weather at all", "A rainbow indoors"],
-        answer: "A storm or rain",
-        hint: "Dark clouds and wind often happen before rain or storms."
-      },
-      {
-        stage: "2",
-        skill: "Weather",
-        type: "choice",
-        prompt: "Which tool measures temperature?",
-        detail: "Think about weather instruments.",
-        choices: ["Thermometer", "Ruler", "Balance scale", "Compass"],
-        answer: "Thermometer",
-        hint: "A thermometer measures how hot or cold something is."
-      },
-      {
-        stage: "2",
-        skill: "Weather",
-        type: "choice",
-        prompt: "Which tool shows wind direction?",
-        detail: "Think about weather tools outside.",
-        choices: ["Wind vane", "Magnifying glass", "Stopwatch", "Measuring cup"],
-        answer: "Wind vane",
-        hint: "A wind vane points with the wind direction."
-      },
-      {
-        stage: "2",
-        skill: "Weather",
-        type: "choice",
-        prompt: "Why do puddles often dry faster on hot windy days?",
-        detail: "Think about evaporation.",
-        choices: ["Heat and wind speed up evaporation", "Wind turns water into rocks", "Heat makes puddles magnetic", "Clouds drink the puddles"],
-        answer: "Heat and wind speed up evaporation",
-        hint: "Warmth and moving air can help liquid water evaporate faster."
-      },
-      {
-        stage: "2",
-        skill: "Environment",
-        type: "choice",
-        prompt: "Why is recycling paper helpful?",
-        detail: "Think about using resources again.",
-        choices: ["It can reduce waste and save resources", "It makes paper impossible to use", "It creates more rubbish", "It stops all rain"],
-        answer: "It can reduce waste and save resources",
-        hint: "Recycling turns used materials into something useful again."
-      },
-      {
-        stage: "2",
-        skill: "Environment",
-        type: "choice",
-        prompt: "Which action helps save water?",
-        detail: "Choose the action that uses less water.",
-        choices: ["Turning off the tap while brushing teeth", "Leaving the hose running", "Taking longer showers every day", "Washing one sock at a time"],
-        answer: "Turning off the tap while brushing teeth",
-        hint: "Turning off the tap stops wasted water."
-      },
-      {
-        stage: "2",
-        skill: "Environment",
-        type: "choice",
-        prompt: "A habitat is changed when trees are cut down. What might happen to animals that lived there?",
-        detail: "Think about food and shelter.",
-        choices: ["They may lose food or shelter", "They will all learn to fly", "They will need no water", "They will turn into plants"],
-        answer: "They may lose food or shelter",
-        hint: "Animals depend on habitats for what they need to survive."
-      },
-      {
-        stage: "2",
-        skill: "Environment",
-        type: "choice",
-        prompt: "Which item should go in a compost bin?",
-        detail: "Compost is made from natural waste that breaks down.",
-        choices: ["Apple core", "Plastic wrapper", "Glass bottle", "Metal spoon"],
-        answer: "Apple core",
-        hint: "Food scraps like apple cores can break down into compost."
-      }
-    ]
+  const subjectTitles = {
+    maths: "Maths",
+    english: "English",
+    science: "Science",
+    engineering: "Engineering",
+    finance: "Finance"
   };
 
-  Object.entries(expandedActivities).forEach(([activitySubject, additions]) => {
-    activities[activitySubject].push(...additions);
-  });
+  const activities = Object.fromEntries(
+    Object.keys(skillsBySubject).map((subject) => [subject, buildSubject(subject)])
+  );
 
   const subject = document.body.dataset.subject;
   if (!subject || !activities[subject]) return;
 
   const els = {
-    stage: document.querySelector("#stageSelect"),
+    year: document.querySelector("#stageSelect"),
     skill: document.querySelector("#skillSelect"),
     question: document.querySelector("#question"),
     choices: document.querySelector("#choices"),
@@ -1505,11 +81,13 @@
   const state = {
     current: null,
     progress: readProgress(),
-    soundEnabled: localStorage.getItem(soundStorageKey) === "true"
+    soundEnabled: localStorage.getItem(soundStorageKey) === "true",
+    typePreference: 0,
+    recentPrompts: []
   };
 
   const celebration = {
-    emojis: ["🎉", "⭐", "🎊", "✨", "🏆", "👏"],
+    emojis: ["Great", "Nice", "Yes", "Sharp", "Boom", "Solved"],
 
     playSuccess() {
       playTone([
@@ -1529,7 +107,7 @@
       const container = document.querySelector("#celebrationContainer");
       if (!container) return;
 
-      for (let i = 0; i < 30; i += 1) {
+      for (let i = 0; i < 28; i += 1) {
         const confetti = document.createElement("div");
         confetti.className = `confetti type-${i % 6}`;
         confetti.style.left = `${Math.random() * 100}%`;
@@ -1542,25 +120,25 @@
       }
     },
 
-    createEmojis() {
+    createWords() {
       const container = document.querySelector("#celebrationContainer");
       if (!container) return;
 
       for (let i = 0; i < 3; i += 1) {
-        const emoji = document.createElement("div");
-        emoji.className = "celebration-emoji";
-        emoji.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)];
-        emoji.style.left = `${30 + Math.random() * 40}%`;
-        emoji.style.top = "50%";
-        emoji.style.animationDelay = `${i * 0.15}s`;
-        container.appendChild(emoji);
-        window.setTimeout(() => emoji.remove(), 1600);
+        const word = document.createElement("div");
+        word.className = "celebration-emoji";
+        word.textContent = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+        word.style.left = `${30 + Math.random() * 40}%`;
+        word.style.top = "50%";
+        word.style.animationDelay = `${i * 0.15}s`;
+        container.appendChild(word);
+        window.setTimeout(() => word.remove(), 1600);
       }
     },
 
     celebrate() {
       this.createConfetti();
-      this.createEmojis();
+      this.createWords();
       this.playSuccess();
     },
 
@@ -1568,6 +146,297 @@
       this.playError();
     }
   };
+
+  function buildSubject(activitySubject) {
+    const result = [];
+    ["3", "6"].forEach((year) => {
+      skillsBySubject[activitySubject].forEach((skill) => {
+        for (let index = 1; index <= 20; index += 1) {
+          result.push(rebalanceActivity(makeActivity(activitySubject, year, skill, index), index));
+        }
+      });
+    });
+    return result;
+  }
+
+  function rebalanceActivity(activity, index) {
+    if (activity.type !== "choice" || index % 3 === 0) return activity;
+
+    return openReview(
+      activity.year,
+      activity.skill,
+      `${activity.prompt} Write the answer and explain why, instead of choosing from options.`,
+      activity.detail,
+      `${activity.answer}. ${activity.hint}`,
+      ["I wrote the answer.", "I gave a reason.", "I used evidence or working."],
+      activity.hint
+    );
+  }
+
+  function makeActivity(activitySubject, year, skill, index) {
+    const kindCycle = year === "3"
+      ? ["choice", "text", "grid", "long", "text"]
+      : ["text", "long", "choice", "grid", "long"];
+    const type = kindCycle[(index - 1) % kindCycle.length];
+    const context = funny[(index + skill.length + year.length) % funny.length];
+    const person = names[(index + skill.length) % names.length];
+    const thing = items[(index + activitySubject.length) % items.length];
+
+    if (activitySubject === "maths") return makeMaths(year, skill, index, type, context, person, thing);
+    if (activitySubject === "english") return makeEnglish(year, skill, index, type, context, person);
+    if (activitySubject === "science") return makeScience(year, skill, index, type, context, person);
+    if (activitySubject === "engineering") return makeEngineering(year, skill, index, type, context, person);
+    return makeFinance(year, skill, index, type, context, person, thing);
+  }
+
+  function pick(list, index, offset = 0) {
+    return list[(index + offset) % list.length];
+  }
+
+  function openReview(year, skill, prompt, detail, sample, checklist, hint) {
+    return { year, skill, type: "long", prompt, detail, sample, checklist, hint };
+  }
+
+  function shortReview(year, skill, prompt, detail, sample, checklist, hint) {
+    return { year, skill, type: "text", prompt, detail, answer: null, sample, checklist, hint };
+  }
+
+  function exactText(year, skill, prompt, detail, answer, hint) {
+    return { year, skill, type: "text", prompt, detail, answer: Array.isArray(answer) ? answer : [String(answer)], hint };
+  }
+
+  function choice(year, skill, prompt, detail, choices, answer, hint) {
+    return { year, skill, type: "choice", prompt, detail, choices, answer, hint };
+  }
+
+  function makeMaths(year, skill, index, type, context, person, thing) {
+    const base = year === "3" ? index + 5 : index + 18;
+    const variant = (index - 1) % 10;
+
+    if (skill === "Fractions") {
+      const total = year === "3" ? pick([4, 6, 8, 10], index) : 100;
+      const target = year === "3" ? Math.max(1, (index * 2) % total) : pick([12, 15, 20, 25, 30, 35, 40, 45, 60, 75], index);
+      if ([0, 4, 8].includes(variant)) {
+        return choice(
+          year,
+          skill,
+          year === "3" ? `${person} coloured ${target} of ${total} equal jelly tiles. Which fraction is coloured?` : `${context} filled ${target} squares on a hundred grid. Which decimal matches?`,
+          "Use the parts shown in the story.",
+          year === "3" ? [`${target}/${total}`, `${total}/${target}`, `1/${total}`, `${target}/10`] : [String(target / 100), `${target / 10}`, `${target}/10`, `${100 - target}%`],
+          year === "3" ? `${target}/${total}` : String(target / 100),
+          year === "3" ? "Coloured parts go on top; total parts go on bottom." : "A hundred grid turns percent into hundredths."
+        );
+      }
+      return {
+        year,
+        skill,
+        type: "grid",
+        prompt: year === "3" ? `${context}: colour ${target}/${total} of the snack bar.` : `${context}: colour ${target}% of the hundred grid, then think of the matching decimal.`,
+        detail: year === "6" ? "Use the hundred grid as your visual model." : `Tap ${target} of the ${total} equal parts.`,
+        grid: { rows: total === 100 ? 10 : 1, columns: total === 100 ? 10 : total, target },
+        answer: year === "6" ? [`${target}%`, `${target}/100`, String(target / 100), String(target)] : [`${target}/${total}`, String(target)],
+        hint: year === "6" ? `${target}% means ${target} out of 100.` : `The top number tells how many parts to colour.`,
+        sample: year === "6" ? `${target}% = ${target}/100. Simplify if possible, then write the decimal.` : `I coloured ${target} equal parts.`
+      };
+    }
+
+    if (skill === "Number") {
+      const prompts = [
+        () => exactText(year, skill, `Find the missing number: ${base} + □ = ${base + index + 11}`, `${context} hid the number under a napkin.`, index + 11, "Subtract the known part from the total."),
+        () => exactText(year, skill, year === "3" ? `Round ${base * 37} to the nearest ten.` : `Round ${base * 137} to the nearest thousand.`, "Look at the place-value digit next door.", year === "3" ? Math.round((base * 37) / 10) * 10 : Math.round((base * 137) / 1000) * 1000, "Five or more rounds up."),
+        () => choice(year, skill, `Which number is ${year === "3" ? "odd" : "prime"}?`, `${person} is sorting numbers before the calculators start arguing.`, year === "3" ? ["17", "24", "36", "48"] : ["29", "21", "39", "51"], year === "3" ? "17" : "29", year === "3" ? "Odd numbers cannot be shared into pairs exactly." : "A prime has exactly two factors."),
+        () => exactText(year, skill, `${person} has ${base} trays with ${year === "3" ? 5 : 12} ${thing} on each tray. How many altogether?`, "Use multiplication, then type the total.", base * (year === "3" ? 5 : 12), "Equal groups can be multiplied."),
+        () => openReview(year, skill, `${context} says ${base * 4} is definitely double ${base * 3}. Explain why that is wrong and show the correct double.`, "Use at least two lines: one calculation and one explanation.", `Double ${base * 3} is ${base * 6}, not ${base * 4}.`, ["I checked the claim.", "I showed the correct calculation.", "I explained the mistake."], "Double means multiply by 2.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    if (skill === "Measurement") {
+      const length = base + 3;
+      const width = year === "3" ? (index % 5) + 3 : (index % 8) + 5;
+      const prompts = [
+        () => exactText(year, skill, `A rectangle for ${context} is ${length} cm long and ${width} cm wide. What is the perimeter?`, "Add every side around the outside.", 2 * (length + width), "Perimeter of a rectangle is length + width + length + width."),
+        () => exactText(year, skill, `A lesson starts at ${year === "3" ? "9:20" : "10:45"} and lasts ${year === "3" ? 35 : 95} minutes. What time does it finish?`, "Count forward carefully.", year === "3" ? ["9:55", "9:55 am"] : ["12:20", "12:20 pm"], "Bridge through the next hour if needed."),
+        () => choice(year, skill, `Which unit best measures the mass of a school bag?`, "Pick the sensible measurement unit.", ["kilograms", "millimetres", "litres", "minutes"], "kilograms", "Mass is measured in grams or kilograms."),
+        () => exactText(year, skill, year === "3" ? `A ribbon is 1 metre long. ${person} uses ${base + 20} cm. How many centimetres are left?` : `A tank holds ${base + 40} L. It is ${width}/10 full. About how many litres are in it?`, "Convert or scale before answering.", year === "3" ? 100 - (base + 20) : Math.round((base + 40) * width / 10), year === "3" ? "One metre is 100 centimetres." : "Multiply the capacity by the fraction full."),
+        () => openReview(year, skill, `${person} wants to cover a desktop for ${context}. Explain whether area or perimeter matters more, then show one calculation you might use.`, "This is a reasoning answer, not just a number.", "Area matters for covering the top; perimeter matters for edging around it.", ["I chose area or perimeter.", "I gave a reason.", "I included a calculation."], "Area covers space; perimeter goes around an edge.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    if (skill === "Data") {
+      const data = [index + 4, index + 7, index + 5, index + 10];
+      const labels = ["skateboards", "sandwiches", "science hats", "mystery coupons"];
+      const prompts = [
+        () => exactText(year, skill, `Data table for ${context}: ${labels.map((label, i) => `${label} ${data[i]}`).join(", ")}. What is the total?`, "Add the four values.", data.reduce((sum, value) => sum + value, 0), "A total means add all categories."),
+        () => exactText(year, skill, `Votes are ${data.join(", ")}. What is the range?`, "Range is largest minus smallest.", Math.max(...data) - Math.min(...data), "Find the biggest and smallest values first."),
+        () => choice(year, skill, `Which graph would best show favourite lunch choices for ${context}?`, "Think about categories.", ["column graph", "line graph", "clock face", "map scale"], "column graph", "Column graphs compare categories well."),
+        () => exactText(year, skill, year === "3" ? `The highest score is ${Math.max(...data)} and the lowest is ${Math.min(...data)}. How many more is the highest?` : `Find the mean of these four scores: ${data.join(", ")}.`, "Use the data, not a guess.", year === "3" ? Math.max(...data) - Math.min(...data) : data.reduce((sum, value) => sum + value, 0) / data.length, year === "3" ? "Compare by subtracting." : "Add them, then divide by 4."),
+        () => openReview(year, skill, `${person} made a graph but forgot the title and labels. Explain two things that would make the graph easier to read.`, "Use data vocabulary in your answer.", "A clear title and labelled axes would tell readers what the data shows.", ["I named two improvements.", "I explained why they help.", "I used data words."], "Think title, labels, scale, and units.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    const a = year === "3" ? base + 8 : base * 3;
+    const b = year === "3" ? index + 6 : base + 12;
+    const prompts = [
+      () => exactText(year, skill, `${context} has ${a} ${thing}. ${person} adds ${b}, then gives away ${index + 3}. How many remain?`, "This has two steps.", a + b - (index + 3), "Add first, then subtract."),
+      () => choice(year, skill, `Which number sentence matches: ${person} buys ${base} bags with 4 ${thing} in each, then gets 6 extra?`, "Choose the matching calculation.", [`${base} x 4 + 6`, `${base} + 4 x 6`, `${base} x 6 - 4`, `${base} + 4 + 6`], `${base} x 4 + 6`, "Bags with equal amounts means multiplication first."),
+      () => openReview(year, skill, `${context} says the answer to a two-step problem is ${a + b}. Write a story problem that has this answer and explain the two steps.`, "Create your own maths story.", `Example: I had ${a}, then got ${b} more. ${a} + ${b} = ${a + b}.`, ["I wrote a clear story.", "I used two steps.", "The answer matches the story."], "Start with the answer, then build the steps backwards."),
+      () => exactText(year, skill, year === "3" ? `${person} shares ${base * 6} ${thing} equally among 6 teams. How many per team?` : `${person} shares ${base * 9 + 4} ${thing} among 9 teams. How many are left over?`, "Think about equal groups.", year === "3" ? base : 4, year === "3" ? "Division undoes multiplication." : "The remainder is what cannot be shared equally."),
+      () => openReview(year, skill, `${person} solved a problem by adding first. Explain when adding first is sensible and when it might not be. Use your own example.`, "This is about choosing operations.", "Adding first is sensible when combining groups before sharing or comparing.", ["I explained the operation choice.", "I gave an example.", "I used maths language."], "Look at what happens first in the story.")
+    ];
+    return prompts[variant % prompts.length]();
+  }
+
+  function makeEnglish(year, skill, index, type, context, person) {
+    const variant = (index - 1) % 10;
+    const passages = [
+      `${person} opened the cupboard and found a map, three spoons, and a note saying, "Do not trust the purple jelly."`,
+      `The playground was silent except for a squeaky wheel rolling slowly past the handball courts.`,
+      `At lunchtime, ${context} announced a new rule: all sandwiches must have a plot twist.`,
+      `${person} missed the bus because the alarm clock had been set to "weekend mode".`
+    ];
+
+    if (skill === "Comprehension") {
+      const passage = pick(passages, index);
+      const prompts = [
+        () => choice(year, skill, `Read: ${passage} What is the best inference?`, "Use clues from the text.", ["Something unusual is happening.", "Everything is completely ordinary.", "The text is a recipe.", "No character has a problem."], "Something unusual is happening.", "An inference uses clues, not just exact words."),
+        () => shortReview(year, skill, `Read: ${passage} Write the main idea in one sentence.`, "Do not copy the whole passage.", "The main idea is that something unusual interrupts an ordinary school moment.", ["I wrote one clear sentence.", "I included the most important idea."], "Ask what the whole passage is mostly about."),
+        () => openReview(year, skill, `Read: ${passage} Answer in two parts: what happened, and what clue helped you know?`, "Use evidence from the passage.", "Something strange happened; the clue is the odd note or unexpected object.", ["I answered both parts.", "I used evidence.", "I explained the clue."], "Quote or mention the clue that proves your idea.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    if (skill === "Grammar") {
+      const prompts = [
+        () => choice(year, skill, `Which word is the verb? "${person} balanced three cupcakes on a ruler."`, "Find the action.", ["balanced", "cupcakes", "three", "ruler"], "balanced", "A verb can show action."),
+        () => choice(year, skill, `Which sentence is punctuated correctly?`, "Check capitals and ending punctuation.", [`${person} packed a pencil, a snack, and a tiny calculator.`, `${person} packed a pencil a snack and a tiny calculator`, `${person} packed, a pencil a snack, and`, `${person.toLowerCase()} packed a pencil.`], `${person} packed a pencil, a snack, and a tiny calculator.`, "Commas separate list items."),
+        () => shortReview(year, skill, `Rewrite this as one sentence with a conjunction: "${person} wanted to read. The bell rang."`, "Use because, but, so, or although.", `${person} wanted to read, but the bell rang.`, ["I joined both ideas.", "I used a sensible conjunction.", "My sentence is complete."], "Choose the joining word that shows the relationship."),
+        () => openReview(year, skill, year === "3" ? `Write two sentences about ${context}: one statement and one question.` : `Write a complex sentence about ${context}. Underline or name the main clause and subordinate clause.`, "Show that you understand sentence structure.", year === "3" ? `The calculator looked worried. Why was it wearing gumboots?` : `Although the calculator looked worried, it still solved the problem.`, ["I followed the sentence type.", "I used correct punctuation."], "Read it aloud to check it is complete.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    if (skill === "Vocabulary") {
+      const words = year === "3" ? ["enormous", "scampered", "gloomy", "sparkling"] : ["reluctant", "astonished", "precise", "unconvincing"];
+      const word = pick(words, index);
+      const prompts = [
+        () => choice(year, skill, `Which word is closest in meaning to "${word}"?`, "Use word knowledge.", year === "3" ? ["huge", "tiny", "silent", "flat"] : ["not eager", "careless", "ordinary", "finished"], year === "3" ? "huge" : "not eager", "A synonym has a similar meaning."),
+        () => shortReview(year, skill, `Write a sentence using "${word}" about ${context}.`, "Make the meaning clear from the sentence.", year === "3" ? `The enormous pancake covered the plate.` : `The reluctant judge finally tasted the suspicious pancake.`, ["I used the word correctly.", "The sentence gives context.", "Punctuation is correct."], "Your sentence should show what the word means."),
+        () => choice(year, skill, `Choose the strongest verb: ${person} ___ across the oval when the bell rang.`, "Choose the word with the clearest picture.", ["sprinted", "went", "did", "was"], "sprinted", "Strong verbs show the action precisely."),
+        () => openReview(year, skill, `Replace three boring words in this sentence: "The big thing went fast past the room."`, "Write the improved sentence and explain one word choice.", "The enormous scooter zoomed past the classroom.", ["I replaced vague words.", "I explained one choice.", "The sentence still makes sense."], "Swap big, thing, went, and fast for precise words.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    if (skill === "Writing") {
+      const prompts = [
+        () => openReview(year, skill, `Write a story opening where ${context} interrupts a normal school day.`, "Use setting, character, and a problem.", "At 9:01, the classroom door clicked open and the lunchbox committee marched in with a glittery rule book.", ["I introduced a setting.", "I introduced a problem.", "I used vivid detail."], "Start normal, then add the surprise."),
+        () => openReview(year, skill, year === "3" ? `Write 3 instructions for making a ridiculous but safe pencil holder.` : `Write a short procedure for testing a ridiculous but safe pencil holder design.`, "Use ordered steps.", "First, fold the cardboard. Next, tape the corners. Finally, test it with five pencils.", ["My steps are in order.", "Each step starts with an action.", "It would be safe to follow."], "Procedures use clear action verbs."),
+        () => shortReview(year, skill, `Improve this sentence: "The lunch was bad."`, "Add specific detail.", "The soggy sandwich collapsed like a tiny, tragic tent.", ["I used detail.", "I avoided repeating bad.", "The sentence is clear."], "Show the reader why it was bad."),
+        () => openReview(year, skill, `Write a diary entry from ${person}'s point of view after meeting ${context}.`, "Include feelings and one event.", "Dear Diary, today the calculator accused my sandwich of suspicious division.", ["I used first person.", "I included a feeling.", "I described one event."], "A diary tells what happened and how the writer felt.")
+      ];
+      return prompts[variant % prompts.length]();
+    }
+
+    const prompts = [
+      () => openReview(year, skill, `Convince the class that ${context} should or should not be allowed at sports day.`, "Use an opinion, two reasons, and a conclusion.", "I believe the serious banana should not run sports day because it may confuse the relay teams and distract the timekeepers.", ["I stated an opinion.", "I gave two reasons.", "I concluded clearly."], "Persuasive writing tries to change the reader's mind."),
+      () => choice(year, skill, `Which sentence is most persuasive?`, "Look for opinion plus reason.", ["Our class should have a reading corner because quiet books help everyone focus.", "There is a corner.", "Books have pages.", "I saw a chair."], "Our class should have a reading corner because quiet books help everyone focus.", "A reason makes an opinion stronger."),
+      () => shortReview(year, skill, `Write one persuasive sentence using an emotive word about ${context}.`, "Make the reader care.", "It would be disastrous to let the budget biscuits control the canteen menu.", ["I used an emotive word.", "I gave a clear opinion."], "Words like unfair, wonderful, wasteful, and essential can persuade."),
+      () => openReview(year, skill, `Write a mini debate response: one sentence for, one sentence against, and your final opinion about ${context}.`, "Show both sides before deciding.", "For: it is funny. Against: it may distract learning. My opinion: it can visit at lunchtime only.", ["I gave both sides.", "I made a final judgement.", "I used clear sentences."], "Balanced thinking makes persuasion stronger.")
+    ];
+    return prompts[variant % prompts.length]();
+  }
+
+  function makeScience(year, skill, index, type, context, person) {
+    const variant = (index - 1) % 10;
+    const banks = {
+      "Living things": [
+        () => choice(year, skill, `Which clue shows that ${context} is studying something living?`, `${person} is trying to classify a suspicious object.`, ["It grows and needs energy", "It is shiny", "It has a price tag", "It makes a loud beep"], "It grows and needs energy", "Living things grow and need energy."),
+        () => openReview(year, skill, `Compare a bean plant and ${context}. Give two reasons only one is living.`, "Use life-process words.", "The bean plant grows and needs water and light. The object can move or make noise, but it does not grow or reproduce.", ["I compared both things.", "I gave two reasons.", "I used science vocabulary."], "Movement alone does not make something alive.")
+      ],
+      Materials: [
+        () => choice(year, skill, `Which material would make the best rain hat for ${context}?`, "Think about properties.", ["waterproof plastic", "tissue paper", "cotton wool", "dry pasta"], "waterproof plastic", "A rain hat needs to resist water."),
+        () => openReview(year, skill, `Choose two materials for a lunchbox designed for ${context}. It must be light, strong, and washable. Explain your choices.`, "Link each material to a property.", "Plastic could be light and washable; metal hinges could be strong.", ["I named materials.", "I linked them to properties.", "I explained the design need."], "Properties explain why a material is useful.")
+      ],
+      Forces: [
+        () => choice(year, skill, `${person}'s toy car rolls farther on tile than carpet during ${context}. What force is smaller on tile?`, "Use the surface clue.", ["friction", "gravity", "magnetism", "evaporation"], "friction", "Smoother surfaces usually create less friction."),
+        () => openReview(year, skill, `Draw or imagine arrows for a cart pushed by ${context}. Explain the push, friction, and gravity in words.`, "Use a line for each force.", "Push moves it forward, friction slows it, gravity pulls it down.", ["I named three forces.", "I explained direction or effect.", "I used evidence from motion."], "Forces can speed up, slow down, or change direction.")
+      ],
+      "Earth and space": [
+        () => choice(year, skill, `During ${context}, why does ${person}'s shadow move during the day?`, "Think about the Sun's apparent position.", ["The Sun appears to move across the sky", "The object gets bored", "The ground becomes smaller", "The shadow runs away"], "The Sun appears to move across the sky", "A shadow points away from the light source."),
+        () => openReview(year, skill, year === "3" ? `Explain why ${context} still has day and night using Earth and the Sun.` : `Explain why ${person} sees moon phases change over a month.`, "Use cause and effect.", year === "3" ? "Earth spins. When our side faces the Sun, it is day; when it faces away, it is night." : "We see different amounts of the Moon's lit half as it orbits Earth.", ["I named the objects involved.", "I explained the change.", "I used correct vocabulary."], "Think about what is moving and what is lit.")
+      ],
+      Investigations: [
+        () => choice(year, skill, `In ${person}'s fair test for ${context}, what should change?`, `${person} is testing which ramp surface is fastest.`, ["only the ramp surface", "the car, ramp, and timer", "the result", "the notebook colour"], "only the ramp surface", "A fair test changes one variable."),
+        () => openReview(year, skill, `Design a fair test for ${context}. Include the question, one thing to change, two things to keep the same, and what you measure.`, "Use headings or separate lines.", "Question: Which surface is fastest? Change: surface. Keep same: car and ramp height. Measure: distance or time.", ["I wrote a question.", "I changed one variable.", "I named evidence to collect."], "Measurements make results stronger.")
+      ]
+    };
+    const templates = banks[skill];
+    return templates[variant % templates.length]();
+  }
+
+  function makeEngineering(year, skill, index, type, context, person) {
+    const variant = (index - 1) % 10;
+    const banks = {
+      "Design brief": [
+        () => openReview(year, skill, `Write a design brief for helping ${context} carry three pencils across a desk.`, "Include user, need, and success criteria.", "User: student. Need: carry pencils. Success: holds 3 pencils and moves 30 cm without dropping them.", ["I named the user.", "I named the need.", "I wrote success criteria."], "A brief explains the problem before the solution."),
+        () => choice(year, skill, `Which is the clearest design criterion for ${person}'s ${context} prototype?`, "Criteria can be tested.", ["It must hold 500 g for 10 seconds", "It should be sort of nice", "It must feel lucky", "It should impress everyone somehow"], "It must hold 500 g for 10 seconds", "Measurable criteria are easier to test.")
+      ],
+      Materials: [
+        () => choice(year, skill, `Which material is best for a flexible hinge on ${context}?`, "Think about bending.", ["rubber band", "dry spaghetti", "glass strip", "chalk"], "rubber band", "Flexible materials bend without breaking."),
+        () => openReview(year, skill, `Choose materials for ${person}'s bridge for ${context}. It must be light but strong. Explain trade-offs.`, "Use properties such as stiff, flexible, strong, light.", "Cardboard can be light and stiff; tape can join parts but may fail if overloaded.", ["I named materials.", "I used property words.", "I explained a trade-off."], "Trade-offs mean gaining one benefit may create another problem.")
+      ],
+      Forces: [
+        () => exactText(year, skill, `A tall tower for ${context} keeps tipping. Should the base be wider or narrower?`, "Type the better option.", ["wider", "wide", "wide base"], "A wider base usually improves stability."),
+        () => openReview(year, skill, `Explain how triangles could help strengthen a bridge for ${person}.`, "Use the word stable or support.", "Triangles can spread loads and stop the bridge shape from bending easily.", ["I explained the shape.", "I linked it to strength.", "I used force or load language."], "Some shapes resist bending better than others.")
+      ],
+      Systems: [
+        () => choice(year, skill, `Which ${context} system has input, process, and output?`, "Think about how parts work together.", ["press button -> motor spins -> fan moves air", "blue -> purple -> maybe", "paper -> sandwich -> cloud", "chair -> quiet -> triangle"], "press button -> motor spins -> fan moves air", "Systems transform inputs into outputs."),
+        () => openReview(year, skill, `Describe the input, process, and output for a classroom doorbell designed by ${context}.`, "Use three labelled lines.", "Input: button press. Process: circuit sends energy. Output: sound.", ["I labelled input.", "I labelled process.", "I labelled output."], "A system has connected parts.")
+      ],
+      Testing: [
+        () => choice(year, skill, `${person}'s prototype for ${context} fails its first test. What should happen next?`, "Engineering uses evidence.", ["change one thing and test again", "throw away all notes", "declare victory", "make the test easier every time"], "change one thing and test again", "Improvement comes from test evidence."),
+        () => openReview(year, skill, `Create a test plan for ${context}'s paper tower. Include what you measure, how many trials, and what change would count as improvement.`, "Use practical, measurable details.", "Measure height and load held. Do 3 trials. Improvement means it holds more load or stands longer.", ["I named a measurement.", "I included repeated trials.", "I defined improvement."], "A good test can be repeated.")
+      ]
+    };
+    const templates = banks[skill];
+    return templates[variant % templates.length]();
+  }
+
+  function makeFinance(year, skill, index, type, context, person, thing) {
+    const income = year === "3" ? index + 3 : index + 12;
+    const weeks = year === "3" ? 4 : 8;
+    const spend = year === "3" ? index + 2 : index + 17;
+    const variant = (index - 1) % 10;
+    const answer = income * weeks - spend;
+    const banks = {
+      "Money maths": [
+        () => exactText(year, skill, `${person} saves $${income} each week for ${weeks} weeks and spends $${spend}. How much is left?`, `${context} is checking the receipt twice.`, [`$${answer}`, String(answer), `${answer} dollars`], `Work out ${income} x ${weeks}, then subtract ${spend}.`),
+        () => exactText(year, skill, `${thing} cost $${spend}. ${person} pays with $${spend + 10}. What change is owed?`, "Count up or subtract.", [`$10`, "10", "10 dollars"], "Change is paid money minus cost."),
+        () => choice(year, skill, `Which total matches three items costing $${income}, $${spend}, and $${index + 5}?`, "Add the prices.", [`$${income + spend + index + 5}`, `$${income + spend}`, `$${spend + index}`, `$${income * 3}`], `$${income + spend + index + 5}`, "Add all three prices.")
+      ],
+      "Needs and wants": [
+        () => choice(year, skill, `Which is a need for a school day?`, "Needs are essential.", ["water bottle", "glitter bookmark", "second dessert", "novelty hat"], "water bottle", "Needs are important for health, safety, or learning."),
+        () => openReview(year, skill, `${person} wants to buy ${thing} before replacing a broken school lunch container. Explain which should come first and why.`, "Use need, want, and reason.", "The lunch container should come first because it is useful for school food; the other item can wait.", ["I identified need and want.", "I gave a reason.", "I made a choice."], "Needs usually come before wants.")
+      ],
+      Budgeting: [
+        () => openReview(year, skill, `${person} has $${income * weeks}. Plan a budget with saving, spending, and one emergency amount for ${context}.`, "Use three lines with amounts.", `Save $${income}, spend $${spend}, keep $${income * weeks - income - spend} spare.`, ["My budget adds up.", "I included saving.", "I kept some money aside."], "A budget is a plan for money before spending."),
+        () => choice(year, skill, `A good budget should...`, "Choose the sensible planning idea.", ["include income, costs, and savings", "ignore small costs", "spend until empty", "only count coins"], "include income, costs, and savings", "Budgets compare money coming in and going out.")
+      ],
+      Saving: [
+        () => exactText(year, skill, `${person} wants $${income * weeks}. If they save $${income} each week, how many weeks will it take?`, "Use division or repeated addition.", [String(weeks), `${weeks} weeks`], "Goal divided by weekly saving gives weeks."),
+        () => openReview(year, skill, `${context} offers two saving plans: $${income} per week for ${weeks} weeks, or $${income + 2} per week for ${weeks - 1} weeks. Compare them and explain which saves more.`, "Show both totals.", `Plan A: $${income * weeks}. Plan B: $${(income + 2) * (weeks - 1)}. Compare the totals.`, ["I calculated both plans.", "I compared totals.", "I wrote a sentence."], "Calculate before choosing.")
+      ],
+      "Value choices": [
+        () => choice(year, skill, `Which is best value if both are useful?`, "Compare price per item.", [`4 for $${income}`, `2 for $${income - 1}`, `1 for $${spend}`, `3 for $${spend + 9}`], `4 for $${income}`, "Best value often has lower cost per item."),
+        () => openReview(year, skill, `${person} can buy a cheap item that breaks quickly or a dearer item that lasts longer. Explain what value for money means.`, "Do not just choose cheapest.", "Value means comparing cost, usefulness, quality, and how long it lasts.", ["I explained value.", "I compared more than price.", "I used a reason."], "Cheapest is not always best value.")
+      ]
+    };
+    const templates = banks[skill];
+    return templates[variant % templates.length]();
+  }
 
   function playTone(notes, volume) {
     if (!state.soundEnabled) return;
@@ -1612,30 +481,59 @@
       .replace(/\.$/, "");
   }
 
-  function scoreForSkill(skill) {
-    const item = state.progress[skill] || { attempts: 0, correct: 0, hints: 0 };
+  function scoreForProgressKey(key) {
+    const item = state.progress[key] || { attempts: 0, correct: 0, hints: 0 };
     if (!item.attempts) return 0;
     return Math.round((item.correct / item.attempts) * 100);
   }
 
+  function progressKeyFor(item) {
+    return `${item.year} ${item.skill}`;
+  }
+
+  function activityKind(item) {
+    if (item.type === "grid") return "grid";
+    if (item.type === "choice") return "choice";
+    if (item.type === "long" || !item.answer) return "written";
+    return "text";
+  }
+
+  function typeOrderForSubject() {
+    if (subject === "maths") return ["written", "grid", "text", "written", "choice"];
+    return ["written", "text", "written", "choice"];
+  }
+
   function getFilteredPool() {
     return activities[subject].filter((item) => {
-      const stageMatch = els.stage.value === "all" || item.stage === els.stage.value;
+      const yearMatch = els.year.value === "all" || item.year === els.year.value;
       const skillMatch = els.skill.value === "all" || item.skill === els.skill.value;
-      return stageMatch && skillMatch;
+      return yearMatch && skillMatch;
     });
   }
 
   function chooseActivity() {
     const pool = getFilteredPool();
     if (!pool.length) return null;
-    const sorted = [...pool].sort((a, b) => scoreForSkill(a.skill) - scoreForSkill(b.skill));
+    const sorted = [...pool].sort((a, b) => scoreForProgressKey(progressKeyFor(a)) - scoreForProgressKey(progressKeyFor(b)));
     const weakSlice = sorted.slice(0, Math.max(1, Math.ceil(sorted.length / 2)));
-    return weakSlice[Math.floor(Math.random() * weakSlice.length)];
+    const typeOrder = typeOrderForSubject();
+    const preferredType = typeOrder[state.typePreference % typeOrder.length];
+    state.typePreference += 1;
+
+    const candidates = weakSlice.filter((item) => activityKind(item) === preferredType);
+    const fallback = pool.filter((item) => activityKind(item) === preferredType);
+    const options = candidates.length ? candidates : (fallback.length ? fallback : weakSlice);
+    const freshOptions = options.filter((item) => !state.recentPrompts.includes(item.prompt));
+    const finalOptions = freshOptions.length ? freshOptions : options;
+    const selected = finalOptions[Math.floor(Math.random() * finalOptions.length)];
+
+    state.recentPrompts.push(selected.prompt);
+    state.recentPrompts = state.recentPrompts.slice(-10);
+    return selected;
   }
 
-  function shuffle(items) {
-    const copy = [...items];
+  function shuffle(itemsToShuffle) {
+    const copy = [...itemsToShuffle];
     for (let i = copy.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));
       [copy[i], copy[j]] = [copy[j], copy[i]];
@@ -1654,7 +552,7 @@
   function renderSkills() {
     const skills = [...new Set(activities[subject].map((item) => item.skill))].sort();
     els.skill.innerHTML = '<option value="all">All skills</option>' + skills
-      .map((skill) => `<option value="${skill}">${skill}</option>`)
+      .map((skill) => `<option value="${escapeHtml(skill)}">${escapeHtml(skill)}</option>`)
       .join("");
   }
 
@@ -1668,28 +566,69 @@
     els.coachBox.hidden = true;
     els.coachBox.textContent = "";
     els.input.value = "";
+    els.input.type = "text";
+    els.input.placeholder = "Type your answer";
+    els.form.querySelector(".primary").textContent = "Check";
 
     if (!item) {
-      els.question.innerHTML = "No activity found.<small>Try another stage or skill.</small>";
+      els.question.innerHTML = "No activity found.<small>Try another year level or skill.</small>";
       els.choices.innerHTML = "";
       els.form.hidden = true;
       return;
     }
 
-    els.question.innerHTML = `${item.prompt}<small>${item.detail}</small>`;
-    els.form.hidden = item.type !== "text";
+    els.question.innerHTML = `${escapeHtml(item.prompt)}<small>${escapeHtml(item.detail)}</small>`;
     els.choices.innerHTML = "";
-
-    if (item.type === "choice") {
-      els.choices.innerHTML = shuffle(item.choices)
-        .map((choice) => `<button type="button" class="choice" data-answer="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`)
-        .join("");
+    els.form.hidden = !["text", "long"].includes(item.type);
+    els.input.hidden = false;
+    if (item.type === "text" && !item.answer) {
+      els.form.querySelector(".primary").textContent = "Review";
+      els.input.placeholder = "Write a sentence or short answer";
     }
+
+    if (item.type === "choice") renderChoices(item);
+    if (item.type === "grid") renderGrid(item);
+    if (item.type === "long") renderLongInput(item);
+  }
+
+  function renderChoices(item) {
+    els.choices.innerHTML = shuffle(item.choices)
+      .map((choice) => `<button type="button" class="choice" data-answer="${escapeHtml(choice)}">${escapeHtml(choice)}</button>`)
+      .join("");
+  }
+
+  function renderGrid(item) {
+    const total = item.grid.rows * item.grid.columns;
+    els.choices.innerHTML = `
+      <div class="work-area">
+        <div class="fraction-grid" style="grid-template-columns: repeat(${item.grid.columns}, 1fr)" aria-label="Tap cells to colour them">
+          ${Array.from({ length: total }, (_, cell) => `<button type="button" class="grid-cell" data-cell="${cell + 1}" aria-label="Cell ${cell + 1}"></button>`).join("")}
+        </div>
+        <div class="grid-actions">
+          <button type="button" id="checkGridBtn">Check coloured parts</button>
+          <button type="button" id="clearGridBtn">Clear</button>
+        </div>
+      </div>
+    `;
+    els.form.hidden = true;
+  }
+
+  function renderLongInput(item) {
+    els.input.hidden = true;
+    document.querySelectorAll("#longAnswerInput").forEach((node) => node.remove());
+    els.form.insertAdjacentHTML("afterbegin", `<textarea id="longAnswerInput" rows="6" placeholder="Write your answer on a few lines"></textarea>`);
+    els.form.querySelector(".primary").textContent = item.answer ? "Check" : "Review";
+  }
+
+  function resetFormButton() {
+    const textarea = document.querySelector("#longAnswerInput");
+    if (textarea) textarea.remove();
+    els.form.querySelector(".primary").textContent = "Check";
   }
 
   function recordResult(correct, usedHint) {
     if (!state.current) return;
-    const key = state.current.skill;
+    const key = `${state.current.year} ${state.current.skill}`;
     const existing = state.progress[key] || { attempts: 0, correct: 0, hints: 0 };
     existing.attempts += 1;
     if (correct) existing.correct += 1;
@@ -1701,6 +640,7 @@
 
   function isCorrect(value) {
     const answer = state.current.answer;
+    if (!answer) return normalize(value).length >= 18;
     const answers = Array.isArray(answer) ? answer : [answer];
     return answers.some((item) => normalize(item) === normalize(value));
   }
@@ -1711,10 +651,12 @@
     recordResult(correct, els.hint.dataset.used === "true");
 
     if (correct) {
-      els.feedback.className = "feedback good";
-      els.feedback.textContent = "Correct. Nice thinking.";
+      els.feedback.className = state.current.answer ? "feedback good" : "feedback warn";
+      els.feedback.innerHTML = state.current.answer
+        ? "Correct. Nice thinking."
+        : reviewHtml(state.current);
       celebration.celebrate();
-      window.setTimeout(renderQuestion, 850);
+      if (state.current.answer) window.setTimeout(() => { resetFormButton(); renderQuestion(); }, 850);
       return;
     }
 
@@ -1723,16 +665,28 @@
     celebration.notifyError();
   }
 
+  function reviewHtml(item) {
+    const checklist = item.checklist || ["I answered the question.", "I explained my thinking."];
+    return `
+      <strong>Review your answer:</strong>
+      <ul>${checklist.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
+      <span>Sample: ${escapeHtml(item.sample || "A clear answer explains the idea and uses evidence.")}</span>
+    `;
+  }
+
   function renderProgress() {
-    const skills = [...new Set(activities[subject].map((item) => item.skill))].sort();
+    const skills = [];
+    ["3", "6"].forEach((year) => {
+      skillsBySubject[subject].forEach((skill) => skills.push(`${year} ${skill}`));
+    });
     els.progress.innerHTML = skills.map((skill) => {
       const item = state.progress[skill] || { attempts: 0, correct: 0, hints: 0 };
       const percent = item.attempts ? Math.round((item.correct / item.attempts) * 100) : 0;
       const label = item.attempts ? `${percent}% from ${item.attempts} tries` : "Not started";
       return `
         <div class="progress-item">
-          <strong>${skill}</strong>
-          <div class="meter" aria-label="${skill} progress"><span style="width: ${percent}%"></span></div>
+          <strong>Year ${escapeHtml(skill)}</strong>
+          <div class="meter" aria-label="${escapeHtml(skill)} progress"><span style="width: ${percent}%"></span></div>
           <span class="note">${label}</span>
         </div>
       `;
@@ -1741,10 +695,11 @@
 
   function localCoachText() {
     if (!state.current) return "Pick an activity first.";
-    const skill = state.current.skill;
-    const progress = state.progress[skill] || { attempts: 0, correct: 0, hints: 0 };
+    if (!state.current.answer) return state.current.sample || state.current.hint;
+    const key = `${state.current.year} ${state.current.skill}`;
+    const progress = state.progress[key] || { attempts: 0, correct: 0, hints: 0 };
     if (progress.attempts >= 3 && progress.correct / progress.attempts < 0.5) {
-      return `Let's slow down on ${skill}. Try explaining the question in your own words before choosing an answer.`;
+      return `Let's slow down on ${state.current.skill}. Try restating the question, then write the first step before answering.`;
     }
     return state.current.hint;
   }
@@ -1760,11 +715,11 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          subject,
-          stage: state.current.stage,
+          subject: subjectTitles[subject],
+          year: state.current.year,
           skill: state.current.skill,
           question: state.current.prompt,
-          progress: state.progress[state.current.skill] || null
+          progress: state.progress[`${state.current.year} ${state.current.skill}`] || null
         })
       });
 
@@ -1783,26 +738,55 @@
   renderQuestion();
   renderSoundToggle();
 
-  els.stage.addEventListener("change", renderQuestion);
-  els.skill.addEventListener("change", renderQuestion);
-  els.next.addEventListener("click", renderQuestion);
+  els.year.addEventListener("change", () => {
+    resetFormButton();
+    renderQuestion();
+  });
+  els.skill.addEventListener("change", () => {
+    resetFormButton();
+    renderQuestion();
+  });
+  els.next.addEventListener("click", () => {
+    resetFormButton();
+    renderQuestion();
+  });
   els.coach.addEventListener("click", getCoachHelp);
   els.reset.addEventListener("click", () => {
     state.progress = {};
     saveProgress();
     renderProgress();
+    resetFormButton();
     renderQuestion();
   });
 
   els.choices.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-answer]");
-    if (!button) return;
-    check(button.dataset.answer);
+    const choiceButton = event.target.closest("[data-answer]");
+    if (choiceButton) {
+      check(choiceButton.dataset.answer);
+      return;
+    }
+
+    const cell = event.target.closest(".grid-cell");
+    if (cell) {
+      cell.classList.toggle("selected");
+      return;
+    }
+
+    if (event.target.id === "clearGridBtn") {
+      els.choices.querySelectorAll(".grid-cell").forEach((node) => node.classList.remove("selected"));
+      return;
+    }
+
+    if (event.target.id === "checkGridBtn") {
+      const selected = els.choices.querySelectorAll(".grid-cell.selected").length;
+      check(String(selected));
+    }
   });
 
   els.form.addEventListener("submit", (event) => {
     event.preventDefault();
-    check(els.input.value);
+    const longAnswer = document.querySelector("#longAnswerInput");
+    check(longAnswer ? longAnswer.value : els.input.value);
   });
 
   document.querySelector("#hintBtn").addEventListener("click", () => {
@@ -1823,4 +807,6 @@
     localStorage.setItem(soundStorageKey, String(state.soundEnabled));
     renderSoundToggle();
   });
+
+  window.skillHubActivities = activities;
 })();

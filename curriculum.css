@@ -385,6 +385,49 @@ textarea {
   font-weight: 700;
 }
 
+.game-panel {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  margin-bottom: 14px;
+}
+
+.game-status {
+  border-left: 4px solid var(--accent);
+  padding: 8px 11px;
+  background: #f8f5ec;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.tic-tac-toe {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(64px, 1fr));
+  gap: 6px;
+  width: min(100%, 330px);
+}
+
+.ttt-cell {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--ink);
+  font-size: clamp(2rem, 10vw, 4.6rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.ttt-cell.x {
+  color: var(--accent);
+}
+
+.ttt-cell.o {
+  color: var(--warn);
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;

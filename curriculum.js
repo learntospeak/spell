@@ -469,7 +469,18 @@
         () => openReview(year, skill, `Invent a game for ${audience}. Explain the goal, three rules, how players win, and one thing you would draw for the game board or screen.`, "This should be more than one sentence.", `Goal: collect art tokens. Rules: move 3 spaces, trade colours, avoid spill cards. Win: first to finish a gallery. Sketch: colourful path board.`, ["I gave the goal.", "I wrote three rules.", "I explained winning.", "I included a visual idea."], "A playable game needs clear rules and a goal."),
         () => shortReview(year, skill, `${person}'s game is fun for one minute, then boring. Suggest one new challenge and one reward.`, "Balance difficulty and motivation.", `Challenge: timed design rounds. Reward: unlock a new sticker style.`, ["I added challenge.", "I added reward.", "The idea fits the game."], "Games need choices, challenge, and feedback."),
         () => choice(year, skill, `Which is the clearest game rule?`, "A player should know exactly what to do.", ["On your turn, draw one card and move two spaces", "Do something fun somehow", "Win if everyone vibes", "Move when the board feels sparkly"], "On your turn, draw one card and move two spaces", "Clear rules use exact actions."),
-        () => openReview(year, skill, year === "3" ? `Design a character for a cosy game. Name it, describe its look, and explain its special power.` : `Design a game loop for a cosy creative game: action, feedback, reward, and next choice.`, "Use game design language.", year === "3" ? `Name: Dot. Look: paint-splattered hoodie. Power: turns mistakes into patterns.` : `Action: decorate a room. Feedback: customers react. Reward: earn design tokens. Next choice: buy materials or accept a brief.`, ["I named the design parts.", "I made the idea playable.", "I kept it clear."], "Game loops explain what players do again and again.")
+        () => openReview(year, skill, year === "3" ? `Design a character for a cosy game. Name it, describe its look, and explain its special power.` : `Design a game loop for a cosy creative game: action, feedback, reward, and next choice.`, "Use game design language.", year === "3" ? `Name: Dot. Look: paint-splattered hoodie. Power: turns mistakes into patterns.` : `Action: decorate a room. Feedback: customers react. Reward: earn design tokens. Next choice: buy materials or accept a brief.`, ["I named the design parts.", "I made the idea playable.", "I kept it clear."], "Game loops explain what players do again and again."),
+        () => ({
+          year,
+          skill,
+          type: "game",
+          game: "tictactoe",
+          prompt: year === "3" ? "Play tic-tac-toe, then design one new rule that would make it sillier or more interesting." : "Play tic-tac-toe, then redesign it for two iPads: describe one rule change, one visual theme, and how players would know whose turn it is.",
+          detail: "Take turns on the board first. Then write your design reflection below.",
+          sample: year === "3" ? "New rule: if you win, you name the next round's theme. Theme: cupcake shop." : "Rule change: players collect design tokens for blocking. Theme: fashion studio. Turn indicator: glowing player badge.",
+          checklist: year === "3" ? ["I played or tested the game.", "I invented one rule change.", "I explained why it helps."] : ["I described a rule change.", "I described the visual theme.", "I explained turn feedback."],
+          hint: "Game designers test the game first, then improve one rule or feedback detail."
+        })
       ],
       "User needs": [
         () => openReview(year, skill, `Interview ${audience} in your imagination. Write three questions you would ask before designing a ${product}.`, "Questions should help you understand the user, not just your own favourite idea.", `What do you need to carry? What annoys you about current cases? What colours or styles do you like?`, ["I wrote three questions.", "The questions help the user.", "I avoided yes/no only questions."], "Designers ask before deciding."),
@@ -542,6 +553,7 @@
   }
 
   function activityKind(item) {
+    if (item.type === "game") return "game";
     if (item.type === "grid") return "grid";
     if (item.type === "choice") return "choice";
     if (item.type === "long" || !item.answer) return "written";
@@ -550,6 +562,7 @@
 
   function typeOrderForSubject() {
     if (subject === "maths") return ["written", "grid", "text", "written", "choice"];
+    if (subject === "design") return ["game", "written", "text", "written", "choice"];
     return ["written", "text", "written", "choice"];
   }
 
@@ -629,7 +642,7 @@
 
     els.question.innerHTML = `${escapeHtml(item.prompt)}<small>${escapeHtml(item.detail)}</small>`;
     els.choices.innerHTML = "";
-    els.form.hidden = !["text", "long"].includes(item.type);
+    els.form.hidden = !["text", "long", "game"].includes(item.type);
     els.input.hidden = false;
     if (item.type === "text" && !item.answer) {
       els.form.querySelector(".primary").textContent = "Review";
@@ -639,6 +652,7 @@
     if (item.type === "choice") renderChoices(item);
     if (item.type === "grid") renderGrid(item);
     if (item.type === "long") renderLongInput(item);
+    if (item.type === "game") renderGame(item);
   }
 
   function renderChoices(item) {
@@ -668,6 +682,23 @@
     document.querySelectorAll("#longAnswerInput").forEach((node) => node.remove());
     els.form.insertAdjacentHTML("afterbegin", `<textarea id="longAnswerInput" rows="6" placeholder="Write your answer on a few lines"></textarea>`);
     els.form.querySelector(".primary").textContent = item.answer ? "Check" : "Review";
+  }
+
+  function renderGame(item) {
+    els.input.hidden = true;
+    document.querySelectorAll("#longAnswerInput").forEach((node) => node.remove());
+    els.choices.innerHTML = `
+      <div class="game-panel" data-game="${escapeHtml(item.game)}">
+        <div class="game-status" id="gameStatus">X starts. Take turns on the same iPad.</div>
+        <div class="tic-tac-toe" aria-label="Tic tac toe board">
+          ${Array.from({ length: 9 }, (_, cell) => `<button type="button" class="ttt-cell" data-ttt="${cell}" aria-label="Square ${cell + 1}"></button>`).join("")}
+        </div>
+        <button type="button" id="resetGameBtn">Reset game</button>
+      </div>
+    `;
+    els.form.insertAdjacentHTML("afterbegin", `<textarea id="longAnswerInput" rows="5" placeholder="After the game, write what you would change or improve"></textarea>`);
+    els.form.querySelector(".primary").textContent = "Review";
+    item.gameState = { board: Array(9).fill(""), turn: "X", finished: false };
   }
 
   function resetFormButton() {
@@ -830,6 +861,17 @@
     if (event.target.id === "checkGridBtn") {
       const selected = els.choices.querySelectorAll(".grid-cell.selected").length;
       check(String(selected));
+      return;
+    }
+
+    const tttCell = event.target.closest("[data-ttt]");
+    if (tttCell) {
+      playTicTacToeMove(Number(tttCell.dataset.ttt), tttCell);
+      return;
+    }
+
+    if (event.target.id === "resetGameBtn") {
+      resetTicTacToe();
     }
   });
 
@@ -857,6 +899,60 @@
     localStorage.setItem(soundStorageKey, String(state.soundEnabled));
     renderSoundToggle();
   });
+
+  function playTicTacToeMove(index, cell) {
+    if (!state.current || state.current.game !== "tictactoe") return;
+    const gameState = state.current.gameState;
+    if (!gameState || gameState.finished || gameState.board[index]) return;
+
+    gameState.board[index] = gameState.turn;
+    cell.textContent = gameState.turn;
+    cell.classList.add(gameState.turn === "X" ? "x" : "o");
+
+    const winner = getTicTacToeWinner(gameState.board);
+    const status = document.querySelector("#gameStatus");
+    if (winner) {
+      gameState.finished = true;
+      status.textContent = `${winner} wins. Now write one design improvement below.`;
+      celebration.celebrate();
+      return;
+    }
+
+    if (gameState.board.every(Boolean)) {
+      gameState.finished = true;
+      status.textContent = "Draw. Now write one design improvement below.";
+      return;
+    }
+
+    gameState.turn = gameState.turn === "X" ? "O" : "X";
+    status.textContent = `${gameState.turn}'s turn.`;
+  }
+
+  function getTicTacToeWinner(board) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+    const line = lines.find(([a, b, c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
+    return line ? board[line[0]] : null;
+  }
+
+  function resetTicTacToe() {
+    if (!state.current || state.current.game !== "tictactoe") return;
+    state.current.gameState = { board: Array(9).fill(""), turn: "X", finished: false };
+    const status = document.querySelector("#gameStatus");
+    if (status) status.textContent = "X starts. Take turns on the same iPad.";
+    els.choices.querySelectorAll(".ttt-cell").forEach((cell) => {
+      cell.textContent = "";
+      cell.classList.remove("x", "o");
+    });
+  }
 
   window.skillHubActivities = activities;
 })();

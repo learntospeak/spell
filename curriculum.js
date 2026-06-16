@@ -42,7 +42,8 @@
     english: ["Comprehension", "Grammar", "Vocabulary", "Writing", "Persuasion"],
     science: ["Living things", "Materials", "Forces", "Earth and space", "Investigations"],
     engineering: ["Design brief", "Materials", "Forces", "Systems", "Testing"],
-    finance: ["Money maths", "Needs and wants", "Budgeting", "Saving", "Value choices"]
+    finance: ["Money maths", "Needs and wants", "Budgeting", "Saving", "Value choices"],
+    design: ["Product ideas", "Branding", "Games", "User needs", "Pitching"]
   };
 
   const subjectTitles = {
@@ -50,7 +51,8 @@
     english: "English",
     science: "Science",
     engineering: "Engineering",
-    finance: "Finance"
+    finance: "Finance",
+    design: "Design"
   };
 
   const activities = Object.fromEntries(
@@ -186,6 +188,7 @@
     if (activitySubject === "english") return makeEnglish(year, skill, index, type, context, person);
     if (activitySubject === "science") return makeScience(year, skill, index, type, context, person);
     if (activitySubject === "engineering") return makeEngineering(year, skill, index, type, context, person);
+    if (activitySubject === "design") return makeDesign(year, skill, index, type, context, person, thing);
     return makeFinance(year, skill, index, type, context, person, thing);
   }
 
@@ -432,6 +435,53 @@
       "Value choices": [
         () => choice(year, skill, `Which is best value if both are useful?`, "Compare price per item.", [`4 for $${income}`, `2 for $${income - 1}`, `1 for $${spend}`, `3 for $${spend + 9}`], `4 for $${income}`, "Best value often has lower cost per item."),
         () => openReview(year, skill, `${person} can buy a cheap item that breaks quickly or a dearer item that lasts longer. Explain what value for money means.`, "Do not just choose cheapest.", "Value means comparing cost, usefulness, quality, and how long it lasts.", ["I explained value.", "I compared more than price.", "I used a reason."], "Cheapest is not always best value.")
+      ]
+    };
+    const templates = banks[skill];
+    return templates[variant % templates.length]();
+  }
+
+  function makeDesign(year, skill, index, type, context, person, thing) {
+    const variant = (index - 1) % 10;
+    const audiences = year === "3"
+      ? ["kids who love drawing", "a friend who loses pencils", "a family picnic", "a school art table", "a bedroom reading corner"]
+      : ["creative tweens", "busy families", "students sharing resources", "a weekend market stall", "players who like cosy games"];
+    const products = ["sticker organiser", "mini desk lamp", "art-kit box", "bookmark set", "school bag charm", "pencil case", "party invitation app", "board game", "snack packaging", "tiny shop display"];
+    const moods = ["bright and playful", "calm and premium", "bold and sporty", "cute but practical", "eco-friendly and handmade"];
+    const audience = pick(audiences, index);
+    const product = pick(products, index, skill.length);
+    const mood = pick(moods, index);
+
+    const banks = {
+      "Product ideas": [
+        () => openReview(year, skill, `Design a ${product} for ${audience}. Describe the problem it solves, three features, and one thing you would sketch on the screen.`, "Use separate lines so the idea is easy to judge.", `Problem: pencils get messy. Features: sections, name label, clip-on charm. Sketch: front view with compartments.`, ["I named the user.", "I described the problem.", "I listed at least three features.", "I included a sketch idea."], "Good products solve a real problem for a clear person."),
+        () => shortReview(year, skill, `${context} wants a product that is useful and beautiful. Write one product idea and explain what makes it both.`, "Do not just name the object; explain the design choice.", `A fold-out art-kit box is useful because it stores supplies and beautiful because the outside has a colour pattern.`, ["I named a product.", "I explained usefulness.", "I explained appearance."], "Useful is about function; beautiful is about how it feels or looks."),
+        () => choice(year, skill, `Which feature would make a pencil case easier to use?`, "Choose the most practical feature.", ["separate sections for different tools", "a secret flap that hides all pencils forever", "no opening", "a label written inside-out"], "separate sections for different tools", "A useful feature makes the job easier."),
+        () => openReview(year, skill, `Improve a boring water bottle for ${person}. Add one creative feature, one practical feature, and one safety rule.`, "Think like a product designer.", `Creative: swappable sticker panel. Practical: measurement marks. Safety: no sharp edges.`, ["I added creative detail.", "I added practical detail.", "I considered safety."], "Design improvement should not make the product harder or unsafe.")
+      ],
+      Branding: [
+        () => openReview(year, skill, `Create a brand for a ${product}. Include the name, colours, logo idea, and the feeling customers should get.`, "This can be sketched on an iPad first, then written here.", `Name: Spark Kit. Colours: teal and yellow. Logo: star pencil. Feeling: organised and excited to create.`, ["I named the brand.", "I chose colours.", "I described a logo.", "I explained the feeling."], "Branding helps people understand the personality of a product."),
+        () => shortReview(year, skill, `Write a slogan for ${context}'s new ${product}. It should be short and memorable.`, "A slogan should sound like something you could put on packaging.", `Tiny tools, giant ideas.`, ["My slogan is short.", "It matches the product.", "It is easy to remember."], "A slogan says the main idea quickly."),
+        () => choice(year, skill, `Which colour choice best fits an eco-friendly handmade brand?`, "Match colour to message.", ["green, cream, and recycled-paper brown", "neon red with warning stripes", "grey only with no label", "random colours that change every minute"], "green, cream, and recycled-paper brown", "Colours can signal a brand's values."),
+        () => openReview(year, skill, `Design packaging for a ${product}. Explain what goes on the front, what information goes on the back, and how the package avoids waste.`, "Use design and business thinking together.", `Front: name, picture, colour pattern. Back: materials and instructions. Less waste: small recycled card sleeve.`, ["I planned front packaging.", "I planned back information.", "I reduced waste."], "Packaging should attract attention and give useful information.")
+      ],
+      Games: [
+        () => openReview(year, skill, `Invent a game for ${audience}. Explain the goal, three rules, how players win, and one thing you would draw for the game board or screen.`, "This should be more than one sentence.", `Goal: collect art tokens. Rules: move 3 spaces, trade colours, avoid spill cards. Win: first to finish a gallery. Sketch: colourful path board.`, ["I gave the goal.", "I wrote three rules.", "I explained winning.", "I included a visual idea."], "A playable game needs clear rules and a goal."),
+        () => shortReview(year, skill, `${person}'s game is fun for one minute, then boring. Suggest one new challenge and one reward.`, "Balance difficulty and motivation.", `Challenge: timed design rounds. Reward: unlock a new sticker style.`, ["I added challenge.", "I added reward.", "The idea fits the game."], "Games need choices, challenge, and feedback."),
+        () => choice(year, skill, `Which is the clearest game rule?`, "A player should know exactly what to do.", ["On your turn, draw one card and move two spaces", "Do something fun somehow", "Win if everyone vibes", "Move when the board feels sparkly"], "On your turn, draw one card and move two spaces", "Clear rules use exact actions."),
+        () => openReview(year, skill, year === "3" ? `Design a character for a cosy game. Name it, describe its look, and explain its special power.` : `Design a game loop for a cosy creative game: action, feedback, reward, and next choice.`, "Use game design language.", year === "3" ? `Name: Dot. Look: paint-splattered hoodie. Power: turns mistakes into patterns.` : `Action: decorate a room. Feedback: customers react. Reward: earn design tokens. Next choice: buy materials or accept a brief.`, ["I named the design parts.", "I made the idea playable.", "I kept it clear."], "Game loops explain what players do again and again.")
+      ],
+      "User needs": [
+        () => openReview(year, skill, `Interview ${audience} in your imagination. Write three questions you would ask before designing a ${product}.`, "Questions should help you understand the user, not just your own favourite idea.", `What do you need to carry? What annoys you about current cases? What colours or styles do you like?`, ["I wrote three questions.", "The questions help the user.", "I avoided yes/no only questions."], "Designers ask before deciding."),
+        () => shortReview(year, skill, `${context} wants every feature possible. Explain why a designer might choose fewer features.`, "Use the words simple, useful, or focus.", `Fewer features can make a product simpler, cheaper, and easier to use.`, ["I explained the trade-off.", "I used design vocabulary."], "More features can make something confusing."),
+        () => choice(year, skill, `Which user need is most specific?`, "Specific needs are easier to design for.", ["I need a bag pocket that keeps markers upright", "I want it to be nice", "Make it cool", "It should be thingy"], "I need a bag pocket that keeps markers upright", "Specific needs describe a clear job."),
+        () => openReview(year, skill, `Create two different designs for the same ${product}: one for Year 3 students and one for Year 6 students. Explain what changes and why.`, "Compare the users clearly.", `Year 3: simpler opening and bright labels. Year 6: more compartments and a mature colour palette.`, ["I made two versions.", "I explained user differences.", "I justified the changes."], "Different users need different design choices.")
+      ],
+      Pitching: [
+        () => openReview(year, skill, `Pitch a ${product} to a mini business fair. Include the product name, target customer, price idea, and why someone would buy it.`, "This is part design, part business thinking.", `Name: ClipKit. Customer: kids who draw. Price: $6. Reason: it keeps favourite pens together and looks custom.`, ["I named the product.", "I named the customer.", "I included a price idea.", "I gave a reason to buy."], "A pitch explains value quickly."),
+        () => shortReview(year, skill, `Write one sentence that makes ${context}'s ${product} sound exciting without over-promising.`, "Be persuasive but believable.", `The Pocket Studio keeps your favourite art tools ready wherever ideas appear.`, ["My sentence is persuasive.", "It is believable.", "It matches the product."], "Strong pitches are clear, not exaggerated."),
+        () => choice(year, skill, `Which pitch is strongest?`, "Look for customer, benefit, and clarity.", ["This art kit helps young creators carry favourite tools without mess", "Buy it because it exists", "It is probably maybe good", "Everyone has to like it"], "This art kit helps young creators carry favourite tools without mess", "A strong pitch explains who it helps and how."),
+        () => openReview(year, skill, year === "3" ? `Make a poster plan for selling a ${product}. Include title, picture idea, price, and one reason to buy.` : `Write a 30-second pitch for a ${product}. Include the problem, solution, customer, and one business risk.`, "Use design and business details.", year === "3" ? `Title: Magic Marker Kit. Picture: open case with colours. Price: $5. Reason: no more lost markers.` : `Problem: art tools get messy. Solution: a compact organiser. Customer: creative students. Risk: material cost may be too high.`, ["I included the required parts.", "I made the value clear.", "I considered the audience."], "A pitch should help someone decide quickly.")
       ]
     };
     const templates = banks[skill];

@@ -13,6 +13,7 @@
   --science: #2e7351;
   --engineering: #6f4d13;
   --finance: #5b6f1b;
+  --design: #9a3f6d;
   --spelling: #7357a8;
   --good: #0d7a4f;
   --bad: #b13d2b;
@@ -235,6 +236,10 @@ h2 {
 
 .subject-card.finance {
   border-top: 5px solid var(--finance);
+}
+
+.subject-card.design {
+  border-top: 5px solid var(--design);
 }
 
 .subject-card.spelling {
@@ -541,6 +546,11 @@ body[data-subject="engineering"] {
 body[data-subject="finance"] {
   --accent: var(--finance);
   --accent-dark: #3d4c10;
+}
+
+body[data-subject="design"] {
+  --accent: var(--design);
+  --accent-dark: #6d294b;
 }
 
 @media (max-width: 800px) {
